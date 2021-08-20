@@ -68,7 +68,6 @@ $ openssl x509 -req \
 
 
 ### Golang & Bazel
-
 ```sh
 # create a git repo. in cloud and back to init Golang mod
 $ go mod init github.com/Gogistics/prj-envoy-v1
@@ -78,7 +77,7 @@ $ go mod tidy
 ```
 
 ### General setup and build
-3. write WORKSPACE and its corresponding BUILD.bazel and run the following commands
+Write WORKSPACE and its corresponding BUILD.bazel and run the following commands
 ```sh
 # run the gazelle target specified in the BUILD file
 $ bazel run //:gazelle
@@ -94,7 +93,7 @@ $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/
 # after building the image, check if the image exists
 $ docker images # in my case, the image repository is alantai/api-app and the tag is atai-v0.0.0
 
-# test image
+# test image by spinning up an api container
 $ docker run -d \
     -p 8443:443 \
     --name atai_envoy_service_api_v1 \
@@ -150,7 +149,7 @@ $ curl -k https://0.0.0.0:8443/api/v1 -vvv
 # < date: Thu, 19 Aug 2021 22:51:41 GMT
 # < 
 # * Connection #0 to host 0.0.0.0 left intact
-# {"Name":"Alan","Hobbies":["workout","programming","driving"]}* Closing connection 0
+# {"Name":"Alan","Hostname":"1cfccd1c9a0a","Hobbies":["workout","programming","driving"]}* Closing connection 0
 
 # take down the container
 $ docker rm -f atai_envoy_service_api_v1

@@ -31,7 +31,7 @@ go_test(
     srcs = ["main._test.go"],
     embed = [":api-v1_lib"],
     deps = [
-        "@com_github_gogistics_go_web_app//api-app/types:go_default_library",
+        "//services/api-v1/types:default",
         "@com_github_google_go_cmp//cmp",
     ],
 )
