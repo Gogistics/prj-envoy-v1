@@ -1,0 +1,19 @@
+
+# By default, failing tests don't print any output, it goes to the log file
+test --test_output=errors
+
+###############################
+# Release support             #
+###############################
+# Releases should always be stamped with version control info
+build --workspace_status_command=./utils/bazel_stamp.sh
+
+
+###############################
+# Output                      #
+###############################
+# A more useful default output mode for bazel query
+query --output=label_kind
+
+# By default, failing tests don't print any output, it goes to the log file
+test --test_output=errors

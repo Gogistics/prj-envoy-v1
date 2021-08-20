@@ -1,0 +1,33 @@
+# Front Envoy
+# build img: docker build -t alantai/envoy:v1 -f ./infra/dockerfiles/Dockerfile.envoy .
+# command of running container:
+#   docker run -d \
+#       --name atai_front_envoy \
+#       -p 80:80 -p 443:443 -p 10000:10000 \
+#       --network atai_front_envoy \
+#       --ip "172.10.0.10" \
+#       --log-opt mode=non-blocking \
+#       --log-opt max-buffer-size=5m \
+#       --log-opt max-size=100m \
+#       --log-opt max-file=5 \
+#       alantai/front-envoy:v1
+
+FROM envoyproxy/envoy-alpine-dev:latest
+
+LABEL maintainer="Alan Tai <gogistics@gogistics-tw.com>"
+
+# copy files into container
+COPY ./infra/certs/* /etc/envoy/certs/
+COPY ./infra/configs/front-envoy-config.yaml /etc/envoy/envoy.yaml
+
+# make certs available for envoy
+RUN chmod 744 /etc/envoy/certs/*
+
+# https://stackoverflow.com/questions/67231714/how-to-add-trusted-root-ca-to-docker-alpine
+RUN apk add --update --no-cache ca-certificates && \
+    mkdir -p /usr/local/share/ca-certificates/extra/ && \
+    cp /etc/envoy/certs/ca-certificates.crt /usr/local/share/ca-certificates/my-certs.crt && \
+    cp /etc/envoy/certs/ca-certificates.crt /usr/local/share/ca-certificates/extra/my-certs.crt && \
+    update-ca-certificates
+
+RUN chmod go+r /etc/envoy/envoy.yaml

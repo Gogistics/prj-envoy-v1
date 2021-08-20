@@ -1,0 +1,3 @@
+exports_files([
+    "run-api-proxy.sh",
+])

@@ -1,0 +1,5 @@
+exports_files([
+    "atai-envoy.com.crt",
+    "atai-envoy.com.key",
+    "custom-ca-certificates.crt",
+])

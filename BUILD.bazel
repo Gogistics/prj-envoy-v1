@@ -1,0 +1,5 @@
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+# the string after prefix represents the project git repo.
+# gazelle:prefix github.com/Gogistics/prj-envoy-v1
+gazelle(name = "gazelle")
