@@ -6,7 +6,7 @@ test --test_output=errors
 # Release support             #
 ###############################
 # Releases should always be stamped with version control info
-build --workspace_status_command=./utils/bazel_stamp.sh
+build --workspace_status_command=./utils/scripts/bazel_stamp.sh
 
 
 ###############################

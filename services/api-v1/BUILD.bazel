@@ -3,8 +3,8 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
 filegroup(
     name = "certs",
     srcs = [
-        "//infra/certs:atai-envoy.com.crt",
-        "//infra/certs:atai-envoy.com.key",
+        "//utils/certs:atai-envoy.com.crt",
+        "//utils/certs:atai-envoy.com.key",
     ],
 )
 
@@ -14,6 +14,7 @@ go_library(
     importpath = "github.com/Gogistics/prj-envoy-v1/services/api-v1",
     visibility = ["//visibility:private"],
     deps = [
+        "//services/api-v1/dbhandlers",
         "//services/api-v1/types:default",
         "@com_github_gorilla_mux//:mux",
         "@com_github_gorilla_websocket//:websocket",

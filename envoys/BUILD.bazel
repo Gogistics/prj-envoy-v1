@@ -3,23 +3,25 @@ load("@io_bazel_rules_docker//container:container.bzl", "container_image", "cont
 filegroup(
     name = "certs",
     srcs = [
-        "//infra/certs:atai-envoy.com.crt",
-        "//infra/certs:atai-envoy.com.key",
-        "//infra/certs:custom-ca-certificates.crt",
+        "//utils/certs:atai-envoy.com.crt",
+        "//utils/certs:atai-envoy.com.key",
+        "//utils/certs:custom-ca-certificates.crt",
     ],
 )
 
 filegroup(
-    name = "config",
+    name = "api-config-execution",
     srcs = [
-        "//infra/configs:api-envoy-config.yaml",
+        "//utils/configs:api-envoy-config.yaml",
+        "//utils/scripts:run-api-proxy.sh",
     ],
 )
 
 filegroup(
-    name = "execution",
+    name = "redis-config-execution",
     srcs = [
-        "//infra/scripts:run-api-proxy.sh",
+        "//utils/configs:redis-envoy-config.yaml",
+        "//utils/scripts:run-redis-proxy.sh",
     ],
 )
 
@@ -30,9 +32,21 @@ container_image(
         "/run-api-proxy.sh",
     ],
     files = [
+        ":api-config-execution",
         ":certs",
-        ":config",
-        ":execution",
+    ],
+    repository = "alantai",
+    visibility = ["//visibility:public"],
+)
+
+container_image(
+    name = "redis-envoy-v0.0.0",  # image tag
+    base = "@alpine_envoy//image",
+    entrypoint = [
+        "/run-redis-proxy.sh",
+    ],
+    files = [
+        ":redis-config-execution",
     ],
     repository = "alantai",
     visibility = ["//visibility:public"],

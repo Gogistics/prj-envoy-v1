@@ -1,10 +1,12 @@
-# Envoy Intro.
+# Envoy Intro. (WIP)
 
 ### Create certs
 
 ```sh
 $ cd infra/
 
+
+# create a cert authority
 $ openssl genrsa -out certs/ca.key 4096
 # Generating RSA private key, 4096 bit long modulus
 # .....++
@@ -36,8 +38,9 @@ $ openssl req -x509 -new -nodes -key certs/ca.key -sha256 -days 1024 -out certs/
 # ...............................................................+++
 # ..............................................+++
 # e is 65537 (0x10001)
+# \create a cert authority
 
-
+# create a domain key
 $ openssl genrsa -out certs/atai-envoy.com.key 2048
 # Generating RSA private key, 2048 bit long modulus
 # ...............................................................+++
@@ -45,12 +48,20 @@ $ openssl genrsa -out certs/atai-envoy.com.key 2048
 # e is 65537 (0x10001)
 
 
+# generate signing requests for proxy and app
 $ openssl req -new -sha256 \
      -key certs/atai-envoy.com.key \
      -subj "/C=US/ST=CA/O=GOGISTICS, Inc./CN=atai-envoy.com" \
      -out certs/atai-envoy.com.csr
 
+$ openssl req -new -sha256 \
+     -key certs/atai-envoy.com.key \
+     -subj "/C=US/ST=CA/O=GOGISTICS, Inc./CN=atai-envoy.com" \
+     -out certs/dev.atai-envoy.com.csr
+# \generate signing requests for proxy and app
 
+
+# generate certificates for each proxy
 $ openssl x509 -req \
      -in certs/atai-envoy.com.csr \
      -CA certs/ca.crt \
@@ -64,19 +75,34 @@ $ openssl x509 -req \
 # subject=/C=US/ST=CA/O=GOGISTICS, Inc./CN=atai-envoy.com
 # Getting CA Private Key
 
+# for dev
+$ openssl x509 -req \
+     -in certs/dev.atai-envoy.com.csr \
+     -CA certs/ca.crt \
+     -CAkey certs/ca.key \
+     -CAcreateserial \
+     -extfile <(printf "subjectAltName=DNS:atai-envoy.com") \
+     -out certs/dev.atai-envoy.com.crt \
+     -days 500 \
+     -sha256
+# Signature ok
+# subject=/C=US/ST=CA/O=GOGISTICS, Inc./CN=atai-envoy.com
+# Getting CA Private Key
+# \generate certificates for each proxy
 ```
 
 
-### Golang & Bazel
+### Golang
 ```sh
 # create a git repo. in cloud and back to init Golang mod
 $ go mod init github.com/Gogistics/prj-envoy-v1
 
-# to add module requirements and sums:
+# add module requirements and sums
 $ go mod tidy
 ```
 
-### General setup and build
+
+### General setup and build by Bazel
 Write WORKSPACE and its corresponding BUILD.bazel and run the following commands
 ```sh
 # run the gazelle target specified in the BUILD file
@@ -84,7 +110,6 @@ $ bazel run //:gazelle
 
 # update repos
 $ bazel run //:gazelle -- update-repos -from_file=go.mod -to_macro=deps.bzl%go_dependencies
-
 
 # build container
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/api-v1:atai-envoy-api-v0.0.0
@@ -160,8 +185,41 @@ $ docker login
 ```
 
 
-## Deploy whole topology
+## Envoy
 ```sh
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:api-envoy-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:api-envoy-v0.0.0
+
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:redis-envoy-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:redis-envoy-v0.0.0
+
+$ docker run -d \
+    --name redis_standalone \
+    --network atai_envoy \
+    --ip "172.10.0.61" \
+    redis:alpine
+
+$ docker run -d \
+      --name atai_envoy_api_service \
+      -p 80:80 -p 443:443 -p 10000:10000 -p 8001:8001 \
+      --network atai_envoy \
+      --ip "172.10.0.10" \
+      --log-opt mode=non-blocking \
+      --log-opt max-buffer-size=5m \
+      --log-opt max-size=100m \
+      --log-opt max-file=5 \
+      alantai/envoys:api-envoy-v0.0.0
+
+$ docker run -d \
+      --name atai_envoy_redis \
+      --network atai_envoy \
+      --ip "172.10.0.50" \
+      --log-opt mode=non-blocking \
+      --log-opt max-buffer-size=5m \
+      --log-opt max-size=100m \
+      --log-opt max-file=5 \
+      alantai/envoys:redis-envoy-v0.0.0
+
 $ docker run -d \
     --name atai_envoy_service_api_v1_1 \
     --network atai_envoy \
@@ -181,25 +239,6 @@ $ docker run -d \
     --log-opt max-size=100m \
     --log-opt max-file=5 \
     alantai/services/api-v1:atai-envoy-api-v0.0.0
-
-```
-
-
-## Envoy
-```sh
-$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:api-envoy-v0.0.0
-$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:api-envoy-v0.0.0
-
-$ docker run -d \
-      --name atai_envoy_api_service \
-      -p 80:80 -p 443:443 -p 10000:10000 -p 8001:8001 \
-      --network atai_envoy \
-      --ip "172.10.0.10" \
-      --log-opt mode=non-blocking \
-      --log-opt max-buffer-size=5m \
-      --log-opt max-size=100m \
-      --log-opt max-file=5 \
-      alantai/envoys:api-envoy-v0.0.0
 
 
 # run service proxy and the api containers to test the api service; edit /etc/hosts by adding 0.0.0.0 atai-envoy.com
@@ -251,6 +290,5 @@ $ curl -k -vvv https://atai-envoy.com/api/v1
 # < 
 # * Connection #0 to host atai-envoy.com left intact
 # {"Name":"Alan","Hostname":"1cfccd1c9a0a","Hobbies":["workout","programming","driving"]}* Closing connection 0
-
-
 ```
+

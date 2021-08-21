@@ -1,4 +1,5 @@
 exports_files([
     "api-envoy-config.yaml",
+    "redis-envoy-config.yaml",
     "front-envoy-config.yaml",
 ])
