@@ -3,4 +3,5 @@ exports_files([
     "redis-envoy-config.yaml",
     "mongo-envoy-config.yaml",
     "front-envoy-config.yaml",
+    "custom-nginx.conf",
 ])

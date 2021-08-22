@@ -1,0 +1,63 @@
+load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
+
+# pkg all sources
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+
+filegroup(
+    name = "certs",
+    srcs = [
+        "//utils/certs:atai-envoy.com.crt",
+        "//utils/certs:atai-envoy.com.key",
+        "//utils/certs:custom-ca-certificates.crt",
+    ],
+)
+
+# note: tmp solutions for envoy demo; it's better to enable bazel build for react and angular
+filegroup(
+    name = "react-build",
+    srcs = ["//services/web-frontend-react:build"],
+)
+
+pkg_tar(
+    name = "react-app",
+    srcs = [
+        ":react-build",
+    ],
+    extension = "tar.gz",
+)
+
+pkg_tar(
+    name = "angular-app",
+    srcs = [
+        "//services/web-frontend-angular:build",
+    ],
+    extension = "tar.gz",
+)
+
+filegroup(
+    name = "nginx-config-execution",
+    srcs = [
+        "//utils/configs:custom-nginx.conf",
+        "//utils/scripts:run-nginx.sh",
+    ],
+)
+
+# https://github.com/bazelbuild/rules_docker/blob/master/docs/container.md#container_image
+container_image(
+    name = "nginx-v0.0.0",  # image tag
+    base = "@alpine_nginx//image",
+    entrypoint = [
+        "/run-nginx.sh",
+    ],
+    files = [
+        ":angular-app",
+        ":certs",
+        ":nginx-config-execution",
+    ],
+    ports = [
+        "443",
+        "80",
+    ],
+    repository = "alantai",
+    visibility = ["//visibility:public"],
+)

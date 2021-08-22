@@ -199,6 +199,9 @@ $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:mo
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:mongo-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:mongo-v0.0.0
 
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:nginx-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:nginx-v0.0.0
+
 # run redis
 $ docker run -d \
     --name redis_standalone \
@@ -212,6 +215,18 @@ $ docker run -d \
     --network atai_envoy \
     --ip "172.10.0.71" \
     alantai/databases:mongo-v0.0.0
+
+# run nginx
+$ docker run -d \
+    --name nginx_web_server_1 \
+    --network atai_envoy \
+    --ip "172.10.0.111" \
+    alantai/services/nginx-v1:nginx-v0.0.0
+$ docker run -d \
+    --name nginx_web_server_2 \
+    --network atai_envoy \
+    --ip "172.10.0.112" \
+    alantai/services/nginx-v1:nginx-v0.0.0
 
 # run api service
 $ docker run -d \

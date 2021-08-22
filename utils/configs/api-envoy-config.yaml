@@ -16,12 +16,15 @@ static_resources:
           - name: envoy.filters.http.router
           route_config:
             virtual_hosts:
-            - name: api
+            - name: api_servers
               domains: ["*"]
               routes:
-              - match: {prefix: "/"}
+              - match: {prefix: "/api"}
                 route:
                   cluster: api_service
+              - match: {prefix: "/"}
+                route:
+                  cluster: nginx_web_server
       transport_socket:
         name: envoy.transport_sockets.tls
         typed_config:
@@ -36,8 +39,31 @@ static_resources:
                 filename: "/etc/ssl/certs/ca-certificates.crt"
 
   clusters:
+  - name: nginx_web_server
+    connect_timeout: 5s
+    type: STATIC
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: nginx_web_server
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: 172.10.0.111
+                port_value: 443
+        - endpoint:
+            address:
+              socket_address:
+                address: 172.10.0.112
+                port_value: 443
+    transport_socket:
+      name: envoy.transport_sockets.tls
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+
   - name: api_service
-    connect_timeout: 7s
+    connect_timeout: 2s
     type: STATIC
     lb_policy: ROUND_ROBIN
     http2_protocol_options: {}
