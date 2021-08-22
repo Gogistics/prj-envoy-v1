@@ -15,7 +15,8 @@ finish() {
 set +e
 
 init_users_dbs() {
-    echo "creating users..."
+    # add more roles here
+    echo "creating users for dbs..."
     mongo web --eval "db.createUser({ user: 'web_admin_user', pwd: 'web-1234567', roles: [ { role: 'userAdminAnyDatabase', db: 'admin' } ] });"
     mongo web --eval "db.createUser({ user: 'web_test_user', pwd: 'web-1234567', roles: [ { role: 'readWrite', db: 'web' } ] });"
 }

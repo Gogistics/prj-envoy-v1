@@ -1,0 +1,44 @@
+# IP: 172.10.0.55
+static_resources:
+  listeners:
+  - name: mongo_listener
+    address:
+      socket_address: {
+        address: 0.0.0.0,
+        port_value: 27017
+      }
+    filter_chains:
+    - filters:
+      - name: envoy.filters.network.mongo_proxy
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.mongo_proxy.v3.MongoProxy
+          stat_prefix: egress_mongo
+          access_log: /tmp/access.log
+          emit_dynamic_metadata: true
+      - name: envoy.filters.network.tcp_proxy
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
+          stat_prefix: ingress_mongo_tcp
+          cluster: mongo_standalone
+  clusters:
+  - name: mongo_standalone
+    connect_timeout: 1s
+    type: STRICT_DNS
+    lb_policy: MAGLEV
+    load_assignment:
+      cluster_name: mongo_standalone
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address: {
+                address: 172.10.0.71,
+                port_value: 27017
+              }
+
+admin:
+  access_log_path: "/dev/null"
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 8001

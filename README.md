@@ -193,24 +193,27 @@ $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:ap
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:redis-envoy-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:redis-envoy-v0.0.0
 
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:mongo-envoy-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:mongo-envoy-v0.0.0
+
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:mongo-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:mongo-v0.0.0
 
-# redis
+# run redis
 $ docker run -d \
     --name redis_standalone \
     --network atai_envoy \
     --ip "172.10.0.61" \
     redis:alpine
 
-# mongo
+# run mongo
 $ docker run -d \
     --name mongo_standalone \
     --network atai_envoy \
     --ip "172.10.0.71" \
     alantai/databases:mongo-v0.0.0
 
-
+# run api service
 $ docker run -d \
       --name atai_envoy_api_service \
       -p 80:80 -p 443:443 -p 10000:10000 -p 8001:8001 \
@@ -231,6 +234,16 @@ $ docker run -d \
       --log-opt max-size=100m \
       --log-opt max-file=5 \
       alantai/envoys:redis-envoy-v0.0.0
+
+$ docker run -d \
+      --name atai_envoy_mongo \
+      --network atai_envoy \
+      --ip "172.10.0.55" \
+      --log-opt mode=non-blocking \
+      --log-opt max-buffer-size=5m \
+      --log-opt max-size=100m \
+      --log-opt max-file=5 \
+      alantai/envoys:mongo-envoy-v0.0.0
 
 $ docker run -d \
     --name atai_envoy_service_api_v1_1 \

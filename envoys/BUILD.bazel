@@ -25,6 +25,14 @@ filegroup(
     ],
 )
 
+filegroup(
+    name = "mongo-config-execution",
+    srcs = [
+        "//utils/configs:mongo-envoy-config.yaml",
+        "//utils/scripts:run-mongo-proxy.sh",
+    ],
+)
+
 container_image(
     name = "api-envoy-v0.0.0",  # image tag
     base = "@alpine_envoy//image",
@@ -47,6 +55,19 @@ container_image(
     ],
     files = [
         ":redis-config-execution",
+    ],
+    repository = "alantai",
+    visibility = ["//visibility:public"],
+)
+
+container_image(
+    name = "mongo-envoy-v0.0.0",  # image tag
+    base = "@alpine_envoy//image",
+    entrypoint = [
+        "/run-mongo-proxy.sh",
+    ],
+    files = [
+        ":mongo-config-execution",
     ],
     repository = "alantai",
     visibility = ["//visibility:public"],

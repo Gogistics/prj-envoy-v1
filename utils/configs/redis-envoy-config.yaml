@@ -1,4 +1,5 @@
 # IP: 172.10.0.50
+# ref: https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/network/redis_proxy/v3/redis_proxy.proto#envoy-v3-api-msg-extensions-filters-network-redis-proxy-v3-redisproxy
 static_resources:
   listeners:
   - name: redis_listener
