@@ -1,0 +1,21 @@
+load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
+
+filegroup(
+    name = "mongo-config-init",
+    srcs = [
+        "//utils/scripts:init_mongo.sh",
+    ],
+)
+
+container_image(
+    name = "mongo-v0.0.0",  # image tag
+    base = "@alpine_3_9//image",
+    entrypoint = [
+        "/init_mongo.sh",
+    ],
+    files = [
+        ":mongo-config-init",
+    ],
+    repository = "alantai",
+    visibility = ["//visibility:public"],
+)

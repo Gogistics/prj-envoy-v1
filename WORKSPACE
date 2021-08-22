@@ -79,6 +79,13 @@ container_pull(
 )
 
 container_pull(
+    name = "alpine_3_9",
+    digest = "sha256:65b3a80ebe7471beecbc090c5b2cdd0aafeaefa0715f8f12e40dc918a3a70e32",
+    registry = "index.docker.io",
+    repository = "library/alpine",
+)
+
+container_pull(
     name = "alpine_envoy_dev",
     digest = "sha256:800d9c3ffed34720b06651ff417368aa3fbdb65b31406bbc194f905fbdf5b73a",
     registry = "index.docker.io",

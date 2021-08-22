@@ -193,11 +193,23 @@ $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:ap
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:redis-envoy-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:redis-envoy-v0.0.0
 
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:mongo-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:mongo-v0.0.0
+
+# redis
 $ docker run -d \
     --name redis_standalone \
     --network atai_envoy \
     --ip "172.10.0.61" \
     redis:alpine
+
+# mongo
+$ docker run -d \
+    --name mongo_standalone \
+    --network atai_envoy \
+    --ip "172.10.0.71" \
+    alantai/databases:mongo-v0.0.0
+
 
 $ docker run -d \
       --name atai_envoy_api_service \

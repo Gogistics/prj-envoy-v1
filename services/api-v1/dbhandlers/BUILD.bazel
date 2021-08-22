@@ -2,8 +2,17 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "dbhandlers",
-    srcs = ["redishandler.go"],
+    srcs = [
+        "mongohandler.go",
+        "redishandler.go",
+    ],
     importpath = "github.com/Gogistics/prj-envoy-v1/services/api-v1/dbhandlers",
     visibility = ["//visibility:public"],
-    deps = ["@com_github_go_redis_redis_v8//:redis"],
+    deps = [
+        "@com_github_go_redis_redis_v8//:redis",
+        "@org_mongodb_go_mongo_driver//bson:go_default_library",
+        "@org_mongodb_go_mongo_driver//bson/primitive:go_default_library",
+        "@org_mongodb_go_mongo_driver//mongo:go_default_library",
+        "@org_mongodb_go_mongo_driver//mongo/options:go_default_library",
+    ],
 )
