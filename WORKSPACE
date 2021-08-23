@@ -78,6 +78,8 @@ container_pull(
     repository = "library/alpine",
 )
 
+# why install Alpine 3.9
+# ref: https://pkgs.alpinelinux.org/packages?name=mongodb&branch=v3.9
 container_pull(
     name = "alpine_3_9",
     digest = "sha256:65b3a80ebe7471beecbc090c5b2cdd0aafeaefa0715f8f12e40dc918a3a70e32",

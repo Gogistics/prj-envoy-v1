@@ -41,7 +41,7 @@ go_test(
 load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 
 container_image(
-    name = "atai-envoy-api-v0.0.0",  # image tag
+    name = "api-v0.0.0",  # image tag
     base = "@alpine_linux_amd64//image",
     entrypoint = [
         "/api-v1",
@@ -59,9 +59,9 @@ container_image(
 container_push(
     name = "push",
     format = "Docker",
-    image = ":atai-envoy-api-v0.0.0",
+    image = ":api-v0.0.0",
     registry = "index.docker.io",
-    repository = "alantai/envoy-service-api",
+    repository = "alantai/prj-envoy-v1",
     tag = "v0.0.0",
 )
 # \docker build

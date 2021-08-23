@@ -13,19 +13,13 @@ filegroup(
 )
 
 # note: tmp solutions for envoy demo; it's better to enable bazel build for react and angular
-filegroup(
-    name = "react-build",
-    srcs = ["//services/web-frontend-react:build"],
-)
-
 pkg_tar(
     name = "react-app",
     srcs = [
-        ":react-build",
+        "//services/web-frontend-react:build",
     ],
     extension = "tar.gz",
 )
-
 pkg_tar(
     name = "angular-app",
     srcs = [
