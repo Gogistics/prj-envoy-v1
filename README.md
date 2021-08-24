@@ -279,9 +279,9 @@ $ docker run -d \
     --ip "172.10.0.112" \
     alantai/services/nginx-v1:nginx-v0.0.0
 
-# run envoy proxy of api service
+# run envoy front proxy
 $ docker run -d \
-      --name atai_envoy_api_service \
+      --name atai_envoy_front \
       -p 80:80 -p 443:443 -p 10000:10000 -p 8001:8001 \
       --network atai_envoy \
       --ip "172.10.0.10" \

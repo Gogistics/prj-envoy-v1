@@ -40,8 +40,8 @@ container_image(
         "/run-front-proxy.sh",
     ],
     files = [
-        ":front-proxy-config-execution",
         ":certs",
+        ":front-proxy-config-execution",
     ],
     repository = "alantai",
     visibility = ["//visibility:public"],

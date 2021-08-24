@@ -21,7 +21,8 @@ var (
 )
 
 func getMongoClient() *mongo.Client {
-  mongoURI := "mongodb://web_test_user:web-1234567@172.10.0.71:27017/web"
+  // 172.10.0.71 is the IP of mongo standalone and 172.10.0.55 is the IP of envoy proxy
+  mongoURI := "mongodb://web_test_user:web-1234567@172.10.0.55:27017/web"
   ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
   defer cancel()
   client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
@@ -81,6 +82,9 @@ func (wrapper MongoClientWrapper) FindOneAndUpdate(key string, val string, newDa
   return strObjId, nil
 }
 
+/* Ref:
+    https://pkg.go.dev/go.mongodb.org/mongo-driver/mongo#Collection.Find
+*/
 func (wrapper MongoClientWrapper) Find(key *string, val *string) ([]bson.M) {
   coll := wrapper.Client.Database("web").Collection("test")
   opts := options.Find()
@@ -88,7 +92,7 @@ func (wrapper MongoClientWrapper) Find(key *string, val *string) ([]bson.M) {
     opts = options.Find().SetSort(bson.D{{*key, 1}})
   }
   filter := bson.D{}
-  if key != nil && val != nil {
+  if key != nil || val != nil {
     filter = append(filter, bson.E{*key, *val})
   }
   cursor, err := coll.Find(context.TODO(), filter, opts)
@@ -98,7 +102,7 @@ func (wrapper MongoClientWrapper) Find(key *string, val *string) ([]bson.M) {
     fmt.Println("Error: failed to query data")
   }
 
-  var results []bson.M
+  results := []bson.M{}
   if err = cursor.All(context.TODO(), &results); err != nil {
     log.Fatal(err)
     fmt.Println("Error: failed to construct returned data")

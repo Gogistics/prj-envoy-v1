@@ -20,6 +20,7 @@ pkg_tar(
     ],
     extension = "tar.gz",
 )
+
 pkg_tar(
     name = "angular-app",
     srcs = [

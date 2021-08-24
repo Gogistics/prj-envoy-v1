@@ -19,9 +19,10 @@ type RedisClientWrapper struct {
 */
 var (
   ctx = context.Background()
+  // 172.10.0.61 is the IP of redis standalone and 172.10.0.50 is the IP of envoy proxy
   RedisWrapper = RedisClientWrapper{
     redis.NewClient(&redis.Options{
-        Addr:     "172.10.0.61:6379", // 172.10.0.61 is the IP of redis standalone and 172.10.0.50 is the IP of envoy proxy
+        Addr:     "172.10.0.50:6379",
         Password: "", // no password set
         DB:       0,  // use default DB
     })}

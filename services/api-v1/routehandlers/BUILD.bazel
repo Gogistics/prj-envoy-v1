@@ -1,0 +1,8 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "routehandlers",
+    srcs = ["defaulthandler.go"],
+    importpath = "github.com/Gogistics/prj-envoy-v1/services/api-v1/routehandlers",
+    visibility = ["//visibility:public"],
+)
