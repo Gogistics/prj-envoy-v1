@@ -15,7 +15,7 @@ type APIType struct {
 
 type Profile struct {
   Hostname          string
-  ServiceProxyIP    string
-  Name              string
+  RemoteAddress    string
+  Author              string
   Hobbies           []string
 }

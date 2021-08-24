@@ -116,11 +116,37 @@ $ openssl x509 -req \
 
 2. Build API app in Golang
 ```sh
-# create a git repo. in cloud and back to init Golang mod
+# create a git repo. in cloud and come back to the project repo. to init Golang mod
 $ go mod init github.com/Gogistics/prj-envoy-v1
 
 # add module requirements and sums
 $ go mod tidy
+```
+
+Notes of developing Golang locally
+```sh
+# bring up redis and mongo
+$ docker run -d \
+    --name redis_standalone \
+    --network atai_envoy \
+    --ip "172.10.0.61" \
+    redis:alpine
+
+# run mongo
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:mongo-envoy-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:mongo-envoy-v0.0.0
+$ docker run -d \
+    --name mongo_standalone \
+    --network atai_envoy \
+    --ip "172.10.0.71" \
+    alantai/databases:mongo-v0.0.0
+
+# go to golang app dir and run the command below
+$ docker run --name atai-envoy --rm --network atai_envoy --ip "172.10.0.3" -it -v $(pwd):/prj -w /prj golang:latest bash
+
+# run golang app in dev mode
+$ go run main -dev
+
 ```
 
 
@@ -209,8 +235,8 @@ $ docker login
 
 4. Build Docker images and run all containers
 ```sh
-$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:api-envoy-v0.0.0
-$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:api-envoy-v0.0.0
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:front-envoy-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:front-envoy-v0.0.0
 
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:redis-envoy-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:redis-envoy-v0.0.0
@@ -263,7 +289,7 @@ $ docker run -d \
       --log-opt max-buffer-size=5m \
       --log-opt max-size=100m \
       --log-opt max-file=5 \
-      alantai/envoys:api-envoy-v0.0.0
+      alantai/envoys:front-envoy-v0.0.0
 
 # run envoy proxy of redis
 $ docker run -d \
@@ -435,3 +461,9 @@ $ curl -k -vvv https://atai-envoy.com
 $ docker rmi $(docker images --filter "dangling=true")
 
 ```
+
+* MongoDB
+
+Ref:
+- https://docs.mongodb.com/v4.0/reference/
+

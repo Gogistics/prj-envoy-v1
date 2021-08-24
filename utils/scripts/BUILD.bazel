@@ -1,5 +1,5 @@
 exports_files([
-    "run-api-proxy.sh",
+    "run-front-proxy.sh",
     "run-redis-proxy.sh",
     "run-mongo-proxy.sh",
     "run-nginx.sh",

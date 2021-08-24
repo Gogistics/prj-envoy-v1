@@ -11,5 +11,5 @@ apk add --update --no-cache ca-certificates &&
   cp custom-ca-certificates.crt /usr/local/share/ca-certificates/ &&
   cp custom-ca-certificates.crt /usr/local/share/ca-certificates/extra/ &&
   update-ca-certificates &&
-  chmod go+r /api-envoy-config.yaml &&
-  envoy -c /api-envoy-config.yaml
+  chmod go+r /front-envoy-config.yaml &&
+  envoy -c /front-envoy-config.yaml

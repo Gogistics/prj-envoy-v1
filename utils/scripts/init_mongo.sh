@@ -15,7 +15,7 @@ load_mongo() {
     # load mongo
     apk update &&
     apk add --no-cache mongodb &&
-    mkdir /data
+    mkdir -p /data
 }
 
 start_mongo_for_init() {
@@ -27,7 +27,7 @@ start_mongo_for_init() {
 
 init_users_dbs() {
     # init dbs
-    # add more roles here
+    # ref: https://stackoverflow.com/questions/22682891/create-a-mongodb-user-from-commandline/22684614
     echo "creating users for dbs..."
     mongo web --eval "db.createUser({ user: 'web_admin_user', pwd: 'web-1234567', roles: [ { role: 'userAdminAnyDatabase', db: 'admin' } ] });"
     mongo web --eval "db.createUser({ user: 'web_test_user', pwd: 'web-1234567', roles: [ { role: 'readWrite', db: 'web' } ] });"

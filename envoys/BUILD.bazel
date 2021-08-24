@@ -10,10 +10,10 @@ filegroup(
 )
 
 filegroup(
-    name = "api-config-execution",
+    name = "front-proxy-config-execution",
     srcs = [
-        "//utils/configs:api-envoy-config.yaml",
-        "//utils/scripts:run-api-proxy.sh",
+        "//utils/configs:front-envoy-config.yaml",
+        "//utils/scripts:run-front-proxy.sh",
     ],
 )
 
@@ -34,13 +34,13 @@ filegroup(
 )
 
 container_image(
-    name = "api-envoy-v0.0.0",  # image tag
+    name = "front-envoy-v0.0.0",  # image tag
     base = "@alpine_envoy//image",
     entrypoint = [
-        "/run-api-proxy.sh",
+        "/run-front-proxy.sh",
     ],
     files = [
-        ":api-config-execution",
+        ":front-proxy-config-execution",
         ":certs",
     ],
     repository = "alantai",
