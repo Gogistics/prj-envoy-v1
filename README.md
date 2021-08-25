@@ -1,7 +1,12 @@
-# Envoy (WIP)
+# Tutorial of Envoy, etc. (WIP)
+This tutorial aims to share my experience of using Envoy with other technical stuff. The demo is going to show you how to deploy Enovy proxies, web app in Golang, Redis, Mongo, and Nginx, and have them communicate with each other. Slides are [here](https://docs.google.com/presentation/d/1Pwcz2QOR7TnffP0VgZ8zxweUiakeF46V6VoPI_gt3rc/edit?usp=sharing).
 
-## Introduction
-Envoy is a high-performance communication bus designed for large modern service-oriented architectures. And Envoy has been developed with the belief that: **The network should be transparent to applications. When network and application problems do occur it should be easy to determine the source of the problem.**
+
+## Introduction of Envoy
+Envoy is a high-performance communication bus designed for large modern service-oriented architectures. And Envoy has been developed with the belief that: **The network should be transparent to applications. When network and application problems do occur it should be easy to determine the source of the problem.** Matt Klein and bunch of contributors already shared their knowledge and information about Envoy in many places, such as CNCF events and talks, YouTube, etc. Strongly suggest reading and watching those resources to know more about Envoy and enjoy developing new stuff with Envoy!
+
+
+[Overview of Envoy architecture](https://drive.google.com/file/d/12I08q2M9WeuaVqIyk8ZwDFTYxJ8K0p4x/view?usp=sharing)
 
 * Out of process architecture
 * Modern C++ code base
@@ -17,7 +22,7 @@ Envoy is a high-performance communication bus designed for large modern service-
 * Scalability/extendability
 
 
-## Tutorial/demo
+## Demo (WIP)
 [Demo diagram](https://drive.google.com/file/d/1vxLz5n-xSXl-OgHwXULtl5MUyzSk7Sdg/view?usp=sharing)
 
 Steps of running the demo are as follows:
