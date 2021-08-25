@@ -14,8 +14,10 @@ type RedisClientWrapper struct {
 }
 
 
-/* Ref:
+/* Ref. for using Redis:
     https://github.com/go-redis/redis
+    https://redis.com/blog/connection-pools-for-serverless-functions-and-backend-services/
+    https://github.com/go-redis/redis/blob/master/example_test.go
 */
 var (
   ctx = context.Background()
@@ -25,6 +27,11 @@ var (
         Addr:     "172.10.0.50:6379",
         Password: "", // no password set
         DB:       0,  // use default DB
+        DialTimeout:  10 * time.Second,
+        ReadTimeout:  30 * time.Second,
+        WriteTimeout: 30 * time.Second,
+        PoolSize:     20,
+        PoolTimeout:  30 * time.Second,
     })}
 )
 

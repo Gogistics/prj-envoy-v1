@@ -62,10 +62,11 @@ static_resources:
       typed_config:
         "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
 
+# https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/cluster/v3/cluster.proto#envoy-v3-api-enum-config-cluster-v3-cluster-lbpolicy
   - name: api_service
     connect_timeout: 2s
     type: STATIC
-    lb_policy: ROUND_ROBIN
+    lb_policy: RING_HASH
     http2_protocol_options: {}
     load_assignment:
       cluster_name: api_service

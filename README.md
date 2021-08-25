@@ -1,5 +1,6 @@
 # Tutorial of Envoy, etc. (WIP)
-This tutorial aims to share my experience of using Envoy with other technical stuff. The demo is going to show you how to deploy Enovy proxies, web app in Golang, Redis, Mongo, and Nginx, and have them communicate with each other. Slides are [here](https://docs.google.com/presentation/d/1Pwcz2QOR7TnffP0VgZ8zxweUiakeF46V6VoPI_gt3rc/edit?usp=sharing).
+This tutorial aims to share my experience of using Envoy. The demo is going to show you how to deploy Enovy proxies, web app in Golang, Redis, Mongo, and Nginx, and have them communicate with each other. With the basic understanding of the communicaiton between components, we will be able to debug the issues of service mesh more efficiently.
+Slides are [here](https://docs.google.com/presentation/d/1Pwcz2QOR7TnffP0VgZ8zxweUiakeF46V6VoPI_gt3rc/edit?usp=sharing).
 
 
 ## Introduction of Envoy
