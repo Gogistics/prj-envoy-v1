@@ -1,6 +1,5 @@
 # Tutorial of Envoy, etc. (WIP)
-This tutorial aims to share my experience of using Envoy. The demo is going to show you how to deploy Enovy proxies, web app in Golang, Redis, Mongo, and Nginx, and have them communicate with each other. With the basic understanding of the communicaiton between components, we will be able to debug the issues of service mesh more efficiently.
-Slides are [here](https://docs.google.com/presentation/d/1Pwcz2QOR7TnffP0VgZ8zxweUiakeF46V6VoPI_gt3rc/edit?usp=sharing).
+This tutorial aims to share my experience of using Envoy. The demo is going to show you how to deploy Enovy proxies, web app in Golang, Redis, Mongo, and Nginx, and have them communicate with each other. With the basic understanding of the communicaiton between components, we will be able to debug the issues of service mesh more efficiently. Slides are [here](https://docs.google.com/presentation/d/1Pwcz2QOR7TnffP0VgZ8zxweUiakeF46V6VoPI_gt3rc/edit?usp=sharing).
 
 
 ## Introduction of Envoy
@@ -32,7 +31,6 @@ Steps of running the demo are as follows:
 
 ```sh
 $ cd infra/
-
 
 # create a cert authority
 $ openssl genrsa -out certs/ca.key 4096
@@ -74,7 +72,6 @@ $ openssl genrsa -out certs/atai-envoy.com.key 2048
 # ...............................................................+++
 # ..............................................+++
 # e is 65537 (0x10001)
-
 
 # generate signing requests for proxy and app
 $ openssl req -new -sha256 \
@@ -139,8 +136,10 @@ $ docker run -d \
     redis:alpine
 
 # run mongo
-$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:mongo-envoy-v0.0.0
-$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:mongo-envoy-v0.0.0
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+    //envoys:mongo-envoy-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+    //envoys:mongo-envoy-v0.0.0
 $ docker run -d \
     --name mongo_standalone \
     --network atai_envoy \
@@ -148,7 +147,14 @@ $ docker run -d \
     alantai/databases:mongo-v0.0.0
 
 # go to golang app dir and run the command below
-$ docker run --name atai-envoy --rm --network atai_envoy --ip "172.10.0.3" -it -v $(pwd):/prj -w /prj golang:latest bash
+$ docker run --name atai-envoy \
+    --network atai_envoy \
+    --ip "172.10.0.3" \
+    -v $(pwd):/prj \
+    -w /prj \
+    -it \
+    --rm \
+    golang:latest bash
 
 # run golang app in dev mode
 $ go run main -dev
@@ -166,8 +172,10 @@ $ bazel run //:gazelle
 $ bazel run //:gazelle -- update-repos -from_file=go.mod -to_macro=deps.bzl%go_dependencies
 
 # build container
-$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/api-v1:api-v0.0.0
-$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/api-v1:api-v0.0.0
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+    //services/api-v1:api-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+    //services/api-v1:api-v0.0.0
 
 # after building the image, check if the image exists
 $ docker images # in my case, the image repository is alantai/api-app and the tag is atai-v0.0.0
