@@ -116,6 +116,19 @@ load(
 _go_image_repos()
 # \load docker rules
 
+# protobuf
+http_archive(
+    name = "com_google_protobuf",
+    sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
+    strip_prefix = "protobuf-3.11.4",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.4.zip"],
+)
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
+protobuf_deps()
+# \protobuf
+
 # external deps
 go_repository(
     name = "com_github_gorilla_mux",

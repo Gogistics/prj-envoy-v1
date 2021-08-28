@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package protos;
+option go_package = "github.com/Gogistics/prj-envoy-v1/services/grpc-v1/protos";
+
+
+// ref: https://stackoverflow.com/questions/43167762/how-to-return-an-array-in-protobuf-service-rpc
+service ServiceIPMapping {
+    // simple RPC
+    //  a service with an empty name is returned if there is no service related to the query
+    rpc QueryServiceUnary(ServiceRequest) returns (Service) {}
+
+    // server-to-client
+    rpc QueryServiceServerStream(ServiceRequest) returns (stream Service) {}
+
+    // client-to-server
+    rpc QueryServiceClientStream(stream ServiceRequest) returns (Service) {}
+
+    // bi-directional streaming RPC
+    rpc QueryServiceBiStream(stream ServiceRequest) returns (stream Service) {}
+}
+
+// type: internal / external
+message ClusterInfo {
+    string type = 1;
+    string group = 2;
+}
+
+message ServiceRequest {
+    ClusterInfo cluster = 1;
+}
+
+message Service {
+    ClusterInfo cluster = 1;
+    string name = 2;
+    string ip = 3;
+}

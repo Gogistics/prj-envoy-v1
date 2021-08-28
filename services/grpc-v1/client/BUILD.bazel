@@ -1,0 +1,8 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "client",
+    srcs = ["client.go"],
+    importpath = "github.com/Gogistics/prj-envoy-v1/services/grpc-v1/client",
+    visibility = ["//visibility:public"],
+)
