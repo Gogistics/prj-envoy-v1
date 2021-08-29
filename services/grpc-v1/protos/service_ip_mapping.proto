@@ -35,3 +35,7 @@ message Service {
     string name = 2;
     string ip = 3;
 }
+
+message GeneralReply {
+    string message = 1;
+}

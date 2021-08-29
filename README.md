@@ -83,6 +83,11 @@ $ openssl req -new -sha256 \
      -key certs/atai-envoy.com.key \
      -subj "/C=US/ST=CA/O=GOGISTICS, Inc./CN=atai-envoy.com" \
      -out certs/dev.atai-envoy.com.csr
+
+$ openssl req -new -sha256 \
+     -key certs/atai-envoy.com.key \
+     -subj "/C=US/ST=CA/O=GOGISTICS, Inc./CN=atai-envoy.com" \
+     -out certs/grpc.atai-envoy.com.csr
 # \generate signing requests for proxy and app
 
 
@@ -108,6 +113,20 @@ $ openssl x509 -req \
      -CAcreateserial \
      -extfile <(printf "subjectAltName=DNS:atai-envoy.com") \
      -out certs/dev.atai-envoy.com.crt \
+     -days 500 \
+     -sha256
+# Signature ok
+# subject=/C=US/ST=CA/O=GOGISTICS, Inc./CN=atai-envoy.com
+# Getting CA Private Key
+
+# for grpc
+$ openssl x509 -req \
+     -in certs/grpc.atai-envoy.com.csr \
+     -CA certs/ca.crt \
+     -CAkey certs/ca.key \
+     -CAcreateserial \
+     -extfile <(printf "subjectAltName=DNS:atai-envoy.com") \
+     -out certs/grpc.atai-envoy.com.crt \
      -days 500 \
      -sha256
 # Signature ok
@@ -249,6 +268,10 @@ $ docker login
 
 4. Build Docker images and run all containers
 ```sh
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:all
+
+# Or run build one by one
+
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:front-envoy-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:front-envoy-v0.0.0
 
