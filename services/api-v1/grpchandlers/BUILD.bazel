@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "grpchandlers",
+    srcs = ["apiclienthandler.go"],
+    importpath = "github.com/Gogistics/prj-envoy-v1/services/api-v1/grpchandlers",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//services/grpc-v1/protos",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//credentials",
+        "@org_golang_google_grpc//health/grpc_health_v1",
+    ],
+)

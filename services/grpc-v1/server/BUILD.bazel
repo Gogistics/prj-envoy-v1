@@ -4,8 +4,8 @@ load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 filegroup(
     name = "certs",
     srcs = [
-        "//utils/certs:atai-envoy.com.key",
         "//utils/certs:atai-envoy.com.crt",
+        "//utils/certs:atai-envoy.com.key",
     ],
 )
 

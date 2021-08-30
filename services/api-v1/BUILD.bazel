@@ -48,7 +48,7 @@ container_image(
         ":api-v1",
         ":certs",
     ],
-    repository = "alantai/prj-envoy-v1",
+    repository = "alantai",
     visibility = ["//visibility:public"],
 )
 # ref: https://github.com/bazelbuild/rules_docker/blob/master/container/image.bzl
@@ -59,7 +59,7 @@ container_push(
     format = "Docker",
     image = ":api-v0.0.0",
     registry = "index.docker.io",
-    repository = "alantai/prj-envoy-v1",
+    repository = "alantai",
     tag = "v0.0.0",
 )
 # \docker build

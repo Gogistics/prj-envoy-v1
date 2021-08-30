@@ -33,6 +33,14 @@ filegroup(
     ],
 )
 
+filegroup(
+    name = "grpc-client-proxy-config-execution",
+    srcs = [
+        "//utils/configs:grpc-client-envoy-config.yaml",
+        "//utils/scripts:run-grpc-client-proxy.sh",
+    ],
+)
+
 container_image(
     name = "front-envoy-v0.0.0",  # image tag
     base = "@alpine_envoy//image",
@@ -68,6 +76,20 @@ container_image(
     ],
     files = [
         ":mongo-config-execution",
+    ],
+    repository = "alantai",
+    visibility = ["//visibility:public"],
+)
+
+container_image(
+    name = "grpc-client-envoy-v0.0.0",  # image tag
+    base = "@alpine_envoy//image",
+    entrypoint = [
+        "/run-grpc-client-proxy.sh",
+    ],
+    files = [
+        ":certs",
+        ":grpc-client-proxy-config-execution",
     ],
     repository = "alantai",
     visibility = ["//visibility:public"],

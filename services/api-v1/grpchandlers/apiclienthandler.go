@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"flag"
 	"io"
 	"io/ioutil"
 	"log"
@@ -17,14 +16,27 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
+type gRPCAPIClient struct {
+	serverAddr      string
+	caCert          string
+	skipHealthCheck bool
+	serverName      string
+}
+type GRPCClientWrapper struct {
+	Client *gRPCAPIClient
+}
+
 var (
-	serverAddr      = flag.String("serverAddr", "172.10.0.200:443", "host:port of gRPC server")
-	skipHealthCheck = flag.Bool("skipHealthCheck", false, "Skip Initial Healthcheck")
-	caCert          = flag.String("caCert", "atai-envoy.com.crt", "tls Certificate")
-	serverName      = flag.String("serverName", "atai-envoy.com", "CACert for server")
+	GRPCWrapper = GRPCClientWrapper{
+		Client: &(gRPCAPIClient{
+			serverAddr:      "172.10.0.200:443",
+			skipHealthCheck: true,
+			caCert:          "certs/atai-envoy.com.crt", // grpc need atai-envoy.com.crt
+			serverName:      "atai-envoy.com",
+		})}
 )
 
-func runUnary(client protos.ServiceIPMappingClient) {
+func (gac *gRPCAPIClient) runUnary(client protos.ServiceIPMappingClient) {
 	log.Println("run unary call...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -38,7 +50,7 @@ func runUnary(client protos.ServiceIPMappingClient) {
 	log.Printf("Unary response => type: %s ; group: %s ; name: %s ; ip: %s", resp.Cluster.Type, resp.Cluster.Group, resp.Name, resp.Ip)
 }
 
-func runClientStream(client protos.ServiceIPMappingClient) {
+func (gac *gRPCAPIClient) runClientStream(client protos.ServiceIPMappingClient) {
 	log.Println("run client stream call...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -68,7 +80,7 @@ func runClientStream(client protos.ServiceIPMappingClient) {
 	}
 }
 
-func runServerStream(client protos.ServiceIPMappingClient) {
+func (gac *gRPCAPIClient) runServerStream(client protos.ServiceIPMappingClient) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	clusterInfo := protos.ClusterInfo{}
@@ -93,7 +105,7 @@ func runServerStream(client protos.ServiceIPMappingClient) {
 	}
 }
 
-func runBiStream(client protos.ServiceIPMappingClient) {
+func (gac *gRPCAPIClient) runBiStream(client protos.ServiceIPMappingClient) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	done := make(chan bool)
@@ -145,26 +157,24 @@ func runBiStream(client protos.ServiceIPMappingClient) {
 		if err := ctxOfBiStream.Err(); err != nil {
 			log.Println("Context err: ", err)
 		}
-		close(done)
 	}()
 
-	<-done
+	// Note: check if done has been closed
+	_, ok := <-done
+	if ok {
+		close(done)
+	}
 }
 
-func main() {
-	flag.Parse()
-
+func (wrapper *GRPCClientWrapper) RunGRPCCalls() {
 	// set up connection to the server
 	var err error
 	var opts []grpc.DialOption
 
 	// set tls
-	if *caCert == "" {
-		*caCert = "atai-envoy.com.crt"
-	}
 	var tlsCfg tls.Config
 	rootCAs := x509.NewCertPool()
-	pem, err := ioutil.ReadFile(*caCert)
+	pem, err := ioutil.ReadFile(wrapper.Client.caCert)
 	if err != nil {
 		log.Fatalf("failed to load root CA certificates  error=%v", err)
 	}
@@ -172,18 +182,13 @@ func main() {
 		log.Fatalf("no root CA certs parsed from file ")
 	}
 	tlsCfg.RootCAs = rootCAs
-	tlsCfg.ServerName = *serverName
-
+	tlsCfg.ServerName = wrapper.Client.serverName
 	creds := credentials.NewTLS(&tlsCfg)
 
-	// creds, err := credentials.NewClientTLSFromFile(*caCert, *serverName)
-	// if err != nil {
-	// 	log.Fatalf("Error: failed to create TLS credentials %v", err)
-	// }
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 	opts = append(opts, grpc.WithBlock())
 	log.Println("Dialing RPC server...")
-	conn, err := grpc.Dial(*serverAddr, opts...)
+	conn, err := grpc.Dial(wrapper.Client.serverAddr, opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
@@ -191,22 +196,23 @@ func main() {
 
 	client := protos.NewServiceIPMappingClient(conn)
 	// runUnary
-	runUnary(client)
+	wrapper.Client.runUnary(client)
 
 	// Client stream
-	runClientStream(client)
+	wrapper.Client.runClientStream(client)
 
 	// Server stream
-	runServerStream(client)
+	wrapper.Client.runServerStream(client)
 
 	// bi-directional stream
-	runBiStream(client)
+	wrapper.Client.runBiStream(client)
 
 	// perform healthcheck request
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	if !*skipHealthCheck {
+	// healthcheck is optional
+	if !wrapper.Client.skipHealthCheck {
 		resp, err := healthpb.NewHealthClient(conn).Check(ctx, &healthpb.HealthCheckRequest{Service: "protos.ServiceIPMapping"})
 		if err != nil {
 			log.Fatalln("Error: HealthCheck failed ", err)

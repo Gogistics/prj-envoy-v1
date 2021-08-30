@@ -1,7 +1,7 @@
 exports_files([
-    # "api-envoy-config.yaml",
     "redis-envoy-config.yaml",
     "mongo-envoy-config.yaml",
     "front-envoy-config.yaml",
+    "grpc-client-envoy-config.yaml",
     "custom-nginx.conf",
 ])

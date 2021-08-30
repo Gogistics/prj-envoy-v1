@@ -145,10 +145,13 @@ func runBiStream(client protos.ServiceIPMappingClient) {
 		if err := ctxOfBiStream.Err(); err != nil {
 			log.Println("Context err: ", err)
 		}
-		close(done)
 	}()
 
-	<-done
+	// Note: check if done has been closed
+	_, ok := <-done
+	if ok {
+		close(done)
+	}
 }
 
 func main() {

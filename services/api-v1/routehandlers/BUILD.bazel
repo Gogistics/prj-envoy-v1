@@ -10,6 +10,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//services/api-v1/dbhandlers",
+        "//services/api-v1/grpchandlers",
         "//services/api-v1/types:default",
         "@com_github_gorilla_websocket//:websocket",
     ],

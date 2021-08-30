@@ -1,15 +1,15 @@
 package routehandlers
 
 import (
-	"fmt"
-	// "log"
 	"encoding/json"
+	"log"
 	"net"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/Gogistics/prj-envoy-v1/services/api-v1/dbhandlers"
+	"github.com/Gogistics/prj-envoy-v1/services/api-v1/grpchandlers"
 	"github.com/Gogistics/prj-envoy-v1/services/api-v1/types"
 )
 
@@ -34,6 +34,16 @@ func countVisitorInfo(req *http.Request) {
 		redisWrapper.Expire(userAgent, 5*time.Minute)
 	}
 
+}
+
+func (wrapper DefaultWrapper) HelloGRPC(respWriter http.ResponseWriter, req *http.Request) {
+	countVisitorInfo(req)
+
+	// TODO: handle errors and add timeout
+	grpchandlers.GRPCWrapper.RunGRPCCalls()
+
+	respWriter.WriteHeader(http.StatusAccepted)
+	respWriter.Write([]byte("Request has been accepted and in processing"))
 }
 
 func (wrapper DefaultWrapper) Hello(respWriter http.ResponseWriter, req *http.Request) {
@@ -76,9 +86,9 @@ func (wrapper DefaultWrapper) PostVisitor(respWriter http.ResponseWriter, req *h
 	req.ParseForm()
 	userName := req.Form.Get("userName")
 	if userName == "" {
-		fmt.Println("unknown user")
+		log.Println("unknown user")
 	} else {
-		fmt.Println("user name: ", userName)
+		log.Println("user name: ", userName)
 
 		newData := make(map[string]string)
 		newData["user-agent"] = userAgent

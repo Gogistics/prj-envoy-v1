@@ -2,6 +2,7 @@ exports_files([
     "run-front-proxy.sh",
     "run-redis-proxy.sh",
     "run-mongo-proxy.sh",
+    "run-grpc-client-proxy.sh",
     "run-nginx.sh",
     "init_mongo.sh",
 ])

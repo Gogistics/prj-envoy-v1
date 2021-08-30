@@ -45,10 +45,10 @@ func (wrapper MongoClientWrapper) InsertOne(val string) error {
 	coll := wrapper.Client.Database("web").Collection("test")
 	resp, err := coll.InsertOne(context.TODO(), bson.M{"userName": val})
 	if err != nil {
-		fmt.Println("Error: failed to insert data into document")
+		log.Fatalln("Error: failed to insert data into document. ", err)
 		return err
 	}
-	fmt.Println("InsertedID: ", resp.InsertedID)
+	log.Println("InsertedID: ", resp.InsertedID)
 	return nil
 }
 
@@ -107,14 +107,12 @@ func (wrapper MongoClientWrapper) Find(key *string, val *string) []bson.M {
 	cursor, err := coll.Find(context.TODO(), filter, opts)
 
 	if err != nil {
-		log.Fatal(err)
-		fmt.Println("Error: failed to query data")
+		log.Fatalln("Error: failed to query data. ", err)
 	}
 
 	results := []bson.M{}
 	if err = cursor.All(context.TODO(), &results); err != nil {
-		log.Fatal(err)
-		fmt.Println("Error: failed to construct returned data")
+		log.Fatalln("Error: failed to construct returned data. ", err)
 	}
 	return results
 }
@@ -133,7 +131,7 @@ func (wrapper MongoClientWrapper) FindID(key string, val string) (string, error)
 
 	id, ok := result["_id"]
 	if !ok {
-		fmt.Println("_id does not exist in result map")
+		log.Println("_id does not exist in result map")
 	}
 	strObjID := id.(primitive.ObjectID).Hex()
 

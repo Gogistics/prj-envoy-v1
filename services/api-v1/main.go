@@ -19,6 +19,7 @@ func newRouter() *mux.Router {
 	rtr.HandleFunc("/api/v1/visitor", routehandlers.Default.PostVisitor).Methods(http.MethodPost)
 	rtr.HandleFunc("/api/v1/visitor", routehandlers.Default.GetVisitor).Methods(http.MethodGet)
 	rtr.HandleFunc("/ws/v1", routehandlers.WebSocket.Communicate)
+	rtr.HandleFunc("/grpc/v1", routehandlers.Default.HelloGRPC).Methods(http.MethodPost)
 	rtr.NotFoundHandler = rtr.NewRoute().HandlerFunc(http.NotFound).GetHandler()
 	return rtr
 }

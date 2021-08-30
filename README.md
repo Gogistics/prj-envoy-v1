@@ -290,6 +290,9 @@ $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/api-v1:api-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/api-v1:api-v0.0.0
 
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:grpc-client-envoy-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:grpc-client-envoy-v0.0.0
+
 # run redis
 $ docker run -d \
     --name redis_standalone \
@@ -317,6 +320,7 @@ $ docker run -d \
     alantai/services/nginx-v1:nginx-v0.0.0
 
 # run envoy front proxy
+# note: -p 10000:10000 -p 8001:8001 for demo /admin
 $ docker run -d \
       --name atai_envoy_front \
       -p 80:80 -p 443:443 -p 10000:10000 -p 8001:8001 \
@@ -350,6 +354,20 @@ $ docker run -d \
       --log-opt max-file=5 \
       alantai/envoys:mongo-envoy-v0.0.0
 
+# run grpc proxy
+$ docker run -d \
+      --name atai_envoy_grpc_client \
+      --network atai_envoy \
+      --ip "172.10.0.200" \
+      --log-opt mode=non-blocking \
+      --log-opt max-buffer-size=5m \
+      --log-opt max-size=100m \
+      --log-opt max-file=5 \
+      alantai/envoys:grpc-client-envoy-v0.0.0
+
+# connect atai_envoy_grpc_client to the other network, atai_grpc
+$ docker network connect atai_grpc atai_envoy_grpc_client
+# \run grpc proxy
 
 # run api service
 $ docker run -d \
