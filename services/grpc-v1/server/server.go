@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -32,7 +31,6 @@ var (
 // ref: https://pkg.go.dev/google.golang.org/grpc/health/grpc_health_v1
 func (hServer *healthServer) Check(ctx context.Context, hcRequest *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
 	log.Println("Handling grpc check request: ", hcRequest.Service)
-	fmt.Println("Handling grpc check request: ", hcRequest.Service)
 	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
 
@@ -42,13 +40,12 @@ func (hServer *healthServer) Watch(hcRequest *healthpb.HealthCheckRequest, hwSer
 
 func (rpcServer *grpcServer) QueryServiceUnary(ctx context.Context, srvQuery *protos.ServiceRequest) (*protos.Service, error) {
 	uid, _ := uuid.NewUUID()
-	log.Println("Got unary request: ", uid)
-	fmt.Println("Received unary request: ", uid)
+	log.Println("Received unary request: ", uid)
 	// TODO: replace hardcode values with values from JSON
-	var clusterInfo *protos.ClusterInfo
-	clusterInfo.Type = "nternal"
+	clusterInfo := protos.ClusterInfo{}
+	clusterInfo.Type = "internal"
 	clusterInfo.Group = "db"
-	return &protos.Service{Cluster: clusterInfo, Name: "", Ip: ""}, nil
+	return &protos.Service{Cluster: &clusterInfo, Name: "hello-grpc", Ip: "172.11.0.11"}, nil
 }
 
 func (rpcServer *grpcServer) QueryServiceServerStream(srvQuery *protos.ServiceRequest, stream protos.ServiceIPMapping_QueryServiceServerStreamServer) error {
@@ -66,10 +63,10 @@ func (rpcServer *grpcServer) QueryServiceServerStream(srvQuery *protos.ServiceRe
 		strBytes.WriteString("group")
 		strBytes.WriteString(uid.String())
 		currGroup := strBytes.String()
-		var clusterInfo *protos.ClusterInfo
+		clusterInfo := protos.ClusterInfo{}
 		clusterInfo.Type = currType
 		clusterInfo.Group = currGroup
-		stream.Send(&protos.Service{Cluster: clusterInfo, Name: uid.String(), Ip: "172.10.0.200"})
+		stream.Send(&protos.Service{Cluster: &clusterInfo, Name: uid.String(), Ip: "172.10.0.200"})
 	}
 	return nil
 }
@@ -79,10 +76,10 @@ func (rpcServer *grpcServer) QueryServiceClientStream(stream protos.ServiceIPMap
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
-			var clusterInfo *protos.ClusterInfo
+			clusterInfo := protos.ClusterInfo{}
 			clusterInfo.Type = "NA"
 			clusterInfo.Group = "NA"
-			return stream.SendAndClose(&protos.Service{Cluster: clusterInfo, Name: "NA", Ip: "NA"})
+			return stream.SendAndClose(&protos.Service{Cluster: &clusterInfo, Name: "NA", Ip: "NA"})
 		} else if err != nil {
 			log.Println(err)
 			return err
@@ -101,10 +98,10 @@ func (rpcServer *grpcServer) QueryServiceBiStream(srvServer protos.ServiceIPMapp
 			continue
 		} else {
 			log.Println("Received QueryServiceBiStream ", req.String())
-			var clusterInfo *protos.ClusterInfo
+			clusterInfo := protos.ClusterInfo{}
 			clusterInfo.Type = "NA"
 			clusterInfo.Group = "NA"
-			resp := &protos.Service{Cluster: clusterInfo, Name: "NA", Ip: "NA"}
+			resp := &protos.Service{Cluster: &clusterInfo, Name: "NA", Ip: "NA"}
 			if err := srvServer.Send(resp); err != nil {
 				log.Println("Error: failed to send response to client. ", err)
 			}
@@ -126,7 +123,7 @@ func main() {
 	var serverOptions []grpc.ServerOption
 
 	if *certFile == "" {
-		*certFile = "grpc.atai-envoy.com.crt"
+		*certFile = "atai-envoy.com.crt"
 	}
 	if *keyFile == "" {
 		*keyFile = "atai-envoy.com.key"
@@ -140,7 +137,7 @@ func main() {
 	rpcServer := grpc.NewServer(serverOptions...)
 	protos.RegisterServiceIPMappingServer(rpcServer, &grpcServer{})
 	healthpb.RegisterHealthServer(rpcServer, &healthServer{})
-	log.Println("Strating server ...")
+	log.Println("Starting server ...")
 
 	if err := rpcServer.Serve(lis); err != nil {
 		log.Fatalf("Error: failed to serve: %v", err)

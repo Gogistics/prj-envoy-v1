@@ -8,16 +8,35 @@ $ bazel build //services/grpc-v1/protos:protos
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
     //services/grpc-v1/server:all
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
-    //services/grpc-v1:service-query-server-v0.0.0
+    //services/grpc-v1/server:service-query-server-v0.0.0
 
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+    //services/grpc-v1/client:all
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+    //services/grpc-v1/client:service-query-client-v0.0.0
+
+
+# run containers
 $ docker run \
-    -it \
+    -itd \
     --name atai_grpc_server \
     --network atai_grpc \
     --ip "172.11.0.11" \
     -p 20000:20000 \
     alantai/services/grpc-v1/server:service-query-server-v0.0.0 \
-    --port 10000 --certFile "grpc.atai-envoy.com.crt" --keyFile "atai-envoy.com.key"
+    --port ":20000" \
+    --certFile "atai-envoy.com.crt" \
+    --keyFile "atai-envoy.com.key"
+
+$ docker run \
+    -itd \
+    --name atai_grpc_client \
+    --network atai_grpc \
+    --ip "172.11.0.12" \
+    alantai/services/grpc-v1/client:service-query-client-v0.0.0 \
+    --caCert "atai-envoy.com.crt" \
+    --serverName "atai-envoy.com" \
+    --serverAddr "172.11.0.11:20000"
 ```
 
 ```sh

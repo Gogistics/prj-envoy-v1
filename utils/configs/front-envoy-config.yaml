@@ -1,5 +1,9 @@
-# ref: https://www.envoyproxy.io/docs/envoy/latest/configuration/configuration
 # API Envoy IP: 172.10.0.10
+# ref:
+#   https://www.envoyproxy.io/docs/envoy/latest/configuration/configuration
+#   https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/tls
+#   https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/websocket
+#   https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/rate_limit_filter
 static_resources:
   listeners:
   - name: listener_https
@@ -39,6 +43,7 @@ static_resources:
               trusted_ca:
                 filename: "/etc/ssl/certs/ca-certificates.crt"
 
+# ref: https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/cluster/v3/cluster.proto#envoy-v3-api-enum-config-cluster-v3-cluster-lbpolicy
   clusters:
   - name: nginx_web_server
     connect_timeout: 5s
@@ -63,7 +68,6 @@ static_resources:
       typed_config:
         "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
 
-# https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/cluster/v3/cluster.proto#envoy-v3-api-enum-config-cluster-v3-cluster-lbpolicy
   - name: api_service
     connect_timeout: 2s
     type: STATIC
@@ -88,6 +92,8 @@ static_resources:
       typed_config:
         "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
 
+
+# ref: https://www.envoyproxy.io/docs/envoy/latest/operations/admin
 admin:
   access_log_path: /tmp/admin_access.log
   address:

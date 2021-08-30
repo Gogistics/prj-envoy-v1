@@ -1,3 +1,4 @@
+# API Envoy IP: 172.10.0.200
 # client side gRPC proxy
 # TODO: complete this config.
 # ref: https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/grpc_bridge
@@ -6,7 +7,7 @@ static_resources:
   - address:
       socket_address:
         address: 0.0.0.0
-        port_value: 9911
+        port_value: 443
     filter_chains:
     - filters:
       - name: envoy.filters.network.http_connection_manager
@@ -30,12 +31,25 @@ static_resources:
               - grpc
               routes:
               - match:
-                  prefix: "/grpc"
+                  prefix: "/"
+                  grpc: {}
                 route:
                   cluster: grpc_service
           http_filters:
           - name: envoy.filters.http.grpc_http1_bridge
           - name: envoy.filters.http.router
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+          common_tls_context:
+            alpn_protocols: [ "h2,http/1.1" ]
+            tls_certificates:
+            - certificate_chain: {filename: "/etc/envoy/certs/atai-envoy.com.crt"}
+              private_key: {filename: "/etc/envoy/certs/atai-envoy.com.key"}
+            validation_context:
+              trusted_ca:
+                filename: "/etc/ssl/certs/ca-certificates.crt"
   clusters:
   - name: grpc_service
     type: LOGICAL_DNS
@@ -51,3 +65,8 @@ static_resources:
               socket_address:
                 address: "172.11.0.11"
                 port_value: 20000
+  transport_socket:
+    name: envoy.transport_sockets.tls
+    typed_config:
+      "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            

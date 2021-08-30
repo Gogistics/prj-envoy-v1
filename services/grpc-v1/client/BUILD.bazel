@@ -1,8 +1,42 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+
+filegroup(
+    name = "certs",
+    srcs = [
+        "//utils/certs:atai-envoy.com.key",
+        "//utils/certs:atai-envoy.com.crt",
+    ],
+)
 
 go_library(
-    name = "client",
+    name = "client_lib",
     srcs = ["client.go"],
     importpath = "github.com/Gogistics/prj-envoy-v1/services/grpc-v1/client",
     visibility = ["//visibility:public"],
+    deps = [
+        "//services/grpc-v1/protos",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//credentials",
+        "@org_golang_google_grpc//health/grpc_health_v1",
+    ],
+)
+
+go_binary(
+    name = "client",
+    embed = [":client_lib"],
+    visibility = ["//visibility:public"],
+)
+
+container_image(
+    name = "service-query-client-v0.0.0",
+    base = "@alpine_linux_amd64//image",
+    entrypoint = [
+        "/client",
+    ],
+    files = [
+        ":certs",
+        ":client",
+    ],
+    repository = "alantai",
 )

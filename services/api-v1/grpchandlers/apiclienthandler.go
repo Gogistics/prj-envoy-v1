@@ -1,4 +1,4 @@
-package main
+package grpchandlers
 
 import (
 	"context"
@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	serverAddr      = flag.String("serverAddr", "172.11.0.11:20000", "host:port of gRPC server")
+	serverAddr      = flag.String("serverAddr", "172.10.0.200:443", "host:port of gRPC server")
 	skipHealthCheck = flag.Bool("skipHealthCheck", false, "Skip Initial Healthcheck")
 	caCert          = flag.String("caCert", "atai-envoy.com.crt", "tls Certificate")
 	serverName      = flag.String("serverName", "atai-envoy.com", "CACert for server")
