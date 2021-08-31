@@ -38,7 +38,7 @@ Basically, the topology comprises the components as follows:
 Install Docker, Bazel, etc.
 
 ### Steps of running the demo:
-1. Create certs
+1. Create certs (optional because all certs have been generated under ./utils/certs/)
 
 ```sh
 $ cd infra/
@@ -139,7 +139,7 @@ $ ./utils/scripts/init_networks.sh
 
 ```
 
-3. Build API app in Golang
+3. Develop and build API app in Golang
 ```sh
 # create a git repo. in cloud and come back to the project root to init Golang mod
 $ go mod init github.com/Gogistics/prj-envoy-v1
@@ -153,6 +153,11 @@ $ go mod tidy
 Notes of developing Golang locally
 ```sh
 # bring up redis and mongo
+
+# run redis
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:redis-standalone-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:redis-standalone-v0.0.0
+
 $ docker run -d \
     --name redis_standalone \
     --network atai_envoy \
@@ -164,14 +169,16 @@ $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
     //envoys:mongo-envoy-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
     //envoys:mongo-envoy-v0.0.0
+
 $ docker run -d \
     --name mongo_standalone \
     --network atai_envoy \
     --ip "172.10.0.71" \
     alantai/databases:mongo-v0.0.0
 
+
 # go to golang app dir and run the command below
-$ docker run --name atai-envoy \
+$ docker run --name atai-go-dev \
     --network atai_envoy \
     --ip "172.10.0.3" \
     -v $(pwd):/prj \
@@ -183,6 +190,8 @@ $ docker run --name atai-envoy \
 # run golang app in dev mode
 $ go run main -dev
 
+# then exec into the same container from the other terminal to test the app
+$ docker exec -it atai-go-dev sh
 ```
 
 4. General setup and build by Bazel
@@ -215,7 +224,7 @@ $ docker run -d \
     --log-opt max-file=5 \
     alantai/services/api-v1:api-v0.0.0
 
-$ curl -k https://0.0.0.0:8443/api/v1 -vvv
+$ curl -k -vvv https://0.0.0.0:8443/api/v1
 # *   Trying 0.0.0.0...
 # * TCP_NODELAY set
 # * Connected to 0.0.0.0 (127.0.0.1) port 8443 (#0)
@@ -262,10 +271,6 @@ $ curl -k https://0.0.0.0:8443/api/v1 -vvv
 
 # take down the container
 $ docker rm -f atai_envoy_service_api_v1
-
-# login container registry
-$ docker login
-
 ```
 
 
@@ -310,7 +315,7 @@ $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:nginx-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:nginx-v0.0.0
 
-# login to the registry and push the docker image to the container registry
+# login to the registry and push the docker images to the registry
 $ docker login
 
 $ bazel run //databases:push-mongo-standalone
@@ -325,8 +330,10 @@ $ bazel run //services/api-v1:push-api
 $ bazel run //services/grpc-v1/server:push-grpc-query-server
 $ bazel run //services/grpc-v1/client:push-grpc-query-client
 $ bazel run //services/nginx-v1:push-nginx
-# \login to the registry and push the docker image to the container registry
+# \login to the registry and push the docker images to the container registry
 
+
+# bring up all containers
 # run redis
 $ docker run -d \
     --name redis_standalone \

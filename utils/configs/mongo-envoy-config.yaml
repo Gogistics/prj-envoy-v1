@@ -13,13 +13,13 @@ static_resources:
       - name: envoy.filters.network.mongo_proxy
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.network.mongo_proxy.v3.MongoProxy
-          stat_prefix: egress_mongo
+          stat_prefix: egress_mongo # from api application perspective
           access_log: /tmp/access.log
           emit_dynamic_metadata: true
       - name: envoy.filters.network.tcp_proxy
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
-          stat_prefix: ingress_mongo_tcp
+          stat_prefix: mongo_tcp
           cluster: mongo_standalone
   clusters:
   - name: mongo_standalone
