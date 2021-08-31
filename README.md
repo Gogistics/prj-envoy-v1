@@ -23,9 +23,9 @@ Envoy is a high-performance communication bus designed for large modern service-
 
 
 ## Demo
-In this demo, we are going to spin up a full container topology illustrated in [demo diagram](https://drive.google.com/file/d/1vxLz5n-xSXl-OgHwXULtl5MUyzSk7Sdg/view?usp=sharing). All Docker images are stored at [DockerHub](https://hub.docker.com/repository/docker/alantai/prj-envoy-v1)
+In this demo, we are going to spin up a full container topology illustrated in [demo diagram](https://drive.google.com/file/d/1vxLz5n-xSXl-OgHwXULtl5MUyzSk7Sdg/view?usp=sharing). All Docker images are stored at [DockerHub](https://hub.docker.com/repository/docker/alantai/prj-envoy-v1).
 
-Basically, the topology comprises the components as follows:
+Basically, the container topology comprises the components as follows:
 * Envoy proxies
 * API applications written in Golang
 * Nginx CDNs
@@ -33,13 +33,31 @@ Basically, the topology comprises the components as follows:
 * Redis
 * gRPC server and client
 
+And the folder directories are as follows:
+* ./databases/ contains a Bazel file for building database Docker images; in this demo, Redis and Mongo standalone will be built.
+* ./envoys/ contains a Bazel file for building Envoy Docker images; in this demo, there are four kinds of Envoy proxies will be built.
+* ./services/ contains api-v1/, grpc-v1/, nginx-v1/, web-frontend-angular/, and web-frontend-react/. api-v1/ is for developing API application in Golang and a Bazel file for building API Docker image, grpc-v1/ is for developing gRPC server and client in Golang and Bazel files for building their Docker images. nginx-v1/ contains a Bazel file for building Nginx Docker image.
+* ./utils/
+
+
+### Context
+Based on the topology, what we want to achieve are as follows:
+* End users interact with remote the API service thorugh Envoy frontend proxy.
+* The API service interacts with Redis, Mongo, and gRPC server throught different kinds of Envoy proxies.
+
 
 ### Prerequisites
-Install Docker, Bazel, etc.
+Install Docker, Bazel, etc. on the Linux environment. I wrote this demo and built the whole topology on my Macbook Pro.
 
-### Steps of running the demo:
-1. Create certs (optional because all certs have been generated under ./utils/certs/)
 
+### Steps of building this demo from scratch
+1. Draw the network/container topology
+2. Create Docker network and certs
+3. Write API application and gRPC server in Golang
+4. Build Docker images
+5. Bring up all the Docker containers
+
+- Create certs
 ```sh
 $ cd infra/
 
@@ -49,7 +67,6 @@ $ openssl genrsa -out certs/ca.key 4096
 # .....++
 # ...............................................................................++
 # e is 65537 (0x10001)
-
 
 $ openssl req -x509 -new -nodes -key certs/ca.key -sha256 -days 1024 -out certs/ca.crt
 # You are about to be asked to enter information that will be incorporated
@@ -101,7 +118,6 @@ $ openssl req -new -sha256 \
      -out certs/grpc.atai-envoy.com.csr
 # \generate signing requests for proxy and app
 
-
 # generate certificates for each proxy
 $ openssl x509 -req \
      -in certs/atai-envoy.com.csr \
@@ -132,52 +148,42 @@ $ openssl x509 -req \
 # \generate certificates for each proxy
 ```
 
-2. Create the Docker networks
+- Develop and build API app in Golang
 ```sh
-# run the command to init two networks for future development
-$ ./utils/scripts/init_networks.sh
-
-```
-
-3. Develop and build API app in Golang
-```sh
-# create a git repo. in cloud and come back to the project root to init Golang mod
+# create a git repo. in cloud and come back to the project root to init a Golang mod
 $ go mod init github.com/Gogistics/prj-envoy-v1
 
-# add module requirements and sums
+# add module requirements and sums by running the command below if needed
 $ go mod tidy
 
-# then start to write the app in Golang; personally I always create a Docker container for running the app written in Golang
-```
+# then start to write the app in Golang; personally I always create a Docker container for running the app written in Golang.
 
-Notes of developing Golang locally
-```sh
-# bring up redis and mongo
+# For example, let's write a app in Golang and connect it to Redis and Mongo.
 
-# run redis
-$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:redis-standalone-v0.0.0
-$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:redis-standalone-v0.0.0
+# 1. bring up redis and mongo
+# build and run redis and mongo
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+    //databases:redis-standalone-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
+    //databases:redis-standalone-v0.0.0
 
-$ docker run -d \
-    --name redis_standalone \
-    --network atai_envoy \
-    --ip "172.10.0.61" \
-    redis:alpine
-
-# run mongo
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
     //envoys:mongo-envoy-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
     //envoys:mongo-envoy-v0.0.0
 
 $ docker run -d \
+    --name redis_standalone \
+    --network atai_envoy \
+    --ip "172.10.0.61" \
+    alantai/prj-envoy-v1/databases:redis-standalone-v0.0.0
+$ docker run -d \
     --name mongo_standalone \
     --network atai_envoy \
     --ip "172.10.0.71" \
-    alantai/databases:mongo-v0.0.0
+    alantai/prj-envoy-v1/databases:mongo-standalone-v0.0.0
 
-
-# go to golang app dir and run the command below
+# 2. run the command below at api-v1/
 $ docker run --name atai-go-dev \
     --network atai_envoy \
     --ip "172.10.0.3" \
@@ -187,23 +193,39 @@ $ docker run --name atai-go-dev \
     --rm \
     golang:latest bash
 
-# run golang app in dev mode
+# 3. write REST APIs
+
+# 4. run golang app in dev mode if a flag, dev, set for running the app dev mode
 $ go run main -dev
 
-# then exec into the same container from the other terminal to test the app
+# then exec into the same container from the other terminal to test the Golang app which you just brought up
 $ docker exec -it atai-go-dev sh
 ```
 
-4. General setup and build by Bazel
-Write WORKSPACE and its corresponding BUILD.bazel and run the following commands
+
+### Steps of bringing up the whole topology with the existing code
+1. Create certs (optional because all certs have been generated under ./utils/certs/)
+
+2. Create the Docker networks
 ```sh
-# run the gazelle target specified in the BUILD file
+# run the command to init two networks for future development
+$ ./utils/scripts/init_networks.sh
+
+```
+
+3. Build by Bazel
+
+Write WORKSPACE and its corresponding BUILD.bazel at the project root dir (optional because both files are ready to use). And then run the following commands
+```sh
+# 1. run the gazelle target specified in the BUILD file
 $ bazel run //:gazelle
 
-# update repos
+# 2. update repos
 $ bazel run //:gazelle -- update-repos -from_file=go.mod -to_macro=deps.bzl%go_dependencies
 
-# build container
+
+# 3. test the API app from outside the container (optional)
+# build container image
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
     //services/api-v1:api-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
@@ -222,7 +244,7 @@ $ docker run -d \
     --log-opt max-buffer-size=5m \
     --log-opt max-size=100m \
     --log-opt max-file=5 \
-    alantai/services/api-v1:api-v0.0.0
+    alantai/prj-envoy-v1/services/api-v1:api-v0.0.0
 
 $ curl -k -vvv https://0.0.0.0:8443/api/v1
 # *   Trying 0.0.0.0...
@@ -271,11 +293,10 @@ $ curl -k -vvv https://0.0.0.0:8443/api/v1
 
 # take down the container
 $ docker rm -f atai_envoy_service_api_v1
-```
+# \3. test the API app from outside the container (optional
 
 
-4. Build Docker images and run all containers
-```sh
+# 4. build all Docker images
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:all
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:all
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/api-v1:all
@@ -283,8 +304,7 @@ $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //service
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/grpc-v1/client:all
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:all
 
-# Or run build one by one
-
+# Or run build one by one and then remember to run bazel run to generate Docker images
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:mongo-standalone-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:mongo-standalone-v0.0.0
 
@@ -315,7 +335,7 @@ $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:nginx-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:nginx-v0.0.0
 
-# login to the registry and push the docker images to the registry
+# 5. login to the registry and push the docker images to the registry
 $ docker login
 
 $ bazel run //databases:push-mongo-standalone
@@ -330,10 +350,9 @@ $ bazel run //services/api-v1:push-api
 $ bazel run //services/grpc-v1/server:push-grpc-query-server
 $ bazel run //services/grpc-v1/client:push-grpc-query-client
 $ bazel run //services/nginx-v1:push-nginx
-# \login to the registry and push the docker images to the container registry
+# \5. login to the registry and push the docker images to the container registry
 
-
-# bring up all containers
+# 6. bring up all containers
 # run redis
 $ docker run -d \
     --name redis_standalone \
@@ -408,7 +427,7 @@ $ docker run -d \
 
 # connect atai_envoy_grpc_client to the other network, atai_grpc
 $ docker network connect atai_grpc atai_envoy_grpc_client
-# \run grpc proxy
+# run grpc proxy
 
 # run grpc
 $ docker run \
@@ -511,11 +530,11 @@ $ curl -k -vvv https://atai-envoy.com/api/v1
 # * Connection #0 to host atai-envoy.com left intact
 # {"Name":"Alan","Hostname":"1cfccd1c9a0a","Hobbies":["workout","programming","driving"]}* Closing connection 0
 
-# post data to mongo and get data from mongo
+# post data to mongo and get data from mongo by running the commands below
 $ curl -k -d "userName=alan" -X POST https://atai-envoy.com/api/v1/visitor
 $ curl -k https://atai-envoy.com/api/v1/visitor
 
-# test nginx servers
+# test nginx servers by running the command below or just visit the website from Chrome. If you encounter a warning related to self-signed certificate, type "thisisunsafe".
 $ curl -k -vvv https://atai-envoy.com
 # *   Trying 0.0.0.0...
 # * TCP_NODELAY set
@@ -580,7 +599,7 @@ $ curl -k -vvv https://atai-envoy.com
 # </body></html>* Closing connection 0
 ```
 
-2. Test Envoy observability http://0.0.0.0:8001
+2. Test Envoy admin by visiting http://0.0.0.0:8001
 
 
 ## MIS

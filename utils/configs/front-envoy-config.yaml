@@ -72,6 +72,9 @@ static_resources:
       typed_config:
         "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
 
+# ref:
+#   https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/load_balancers
+#   https://developers.cloudflare.com/load-balancing/additional-options/load-shedding
   - name: api_service
     connect_timeout: 2s
     type: STATIC
