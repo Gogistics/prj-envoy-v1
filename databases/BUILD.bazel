@@ -8,7 +8,7 @@ filegroup(
 )
 
 container_image(
-    name = "mongo-v0.0.0",  # image tag
+    name = "mongo-standalone-v0.0.0",  # image tag
     base = "@alpine_3_9//image",
     entrypoint = [
         "/init_mongo.sh",
@@ -16,6 +16,32 @@ container_image(
     files = [
         ":mongo-config-init",
     ],
-    repository = "alantai",
+    repository = "alantai/prj-envoy-v1",
     visibility = ["//visibility:public"],
+)
+
+container_image(
+    name = "redis-standalone-v0.0.0",  # image tag
+    base = "@alpine_redis_standalone//image",
+    repository = "alantai/prj-envoy-v1",
+    visibility = ["//visibility:public"],
+)
+
+# declare where and how the image will be published
+container_push(
+    name = "push-mongo-standalone",
+    format = "Docker",
+    image = ":mongo-standalone-v0.0.0",
+    registry = "index.docker.io",
+    repository = "alantai/prj-envoy-v1",
+    tag = "mongo-standalone-v0.0.0",
+)
+
+container_push(
+    name = "push-redis-standalone",
+    format = "Docker",
+    image = ":redis-standalone-v0.0.0",
+    registry = "index.docker.io",
+    repository = "alantai/prj-envoy-v1",
+    tag = "redis-standalone-v0.0.0",
 )

@@ -1,5 +1,5 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image", "container_push")
 
 filegroup(
     name = "certs",
@@ -32,7 +32,7 @@ go_binary(
 )
 
 container_image(
-    name = "service-query-server-v0.0.0",
+    name = "grpc-query-server-v0.0.0",
     base = "@alpine_linux_amd64//image",
     entrypoint = [
         "/server",
@@ -41,5 +41,15 @@ container_image(
         ":certs",
         ":server",
     ],
-    repository = "alantai",
+    repository = "alantai/prj-envoy-v1",
+)
+
+# declare where and how the image will be published
+container_push(
+    name = "push-grpc-query-server",
+    format = "Docker",
+    image = ":grpc-query-server-v0.0.0",
+    tag = "grpc-query-server-v0.0.0",
+    registry = "index.docker.io",
+    repository = "alantai/prj-envoy-v1",
 )

@@ -108,6 +108,13 @@ container_pull(
     repository = "envoyproxy/envoy-alpine",
 )
 
+container_pull(
+    name = "alpine_redis_standalone",
+    digest = "sha256:324faae103b6af6dd7085748ca8ea99b9e32785a0f3f80f62ce6f2d5185aeaaa",
+    registry = "index.docker.io",
+    repository = "redis",
+)
+
 load(
     "@io_bazel_rules_docker//go:image.bzl",
     _go_image_repos = "repositories",

@@ -4,6 +4,7 @@
 #   https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/tls
 #   https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/websocket
 #   https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/rate_limit_filter
+#   https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/network/http_connection_manager/v3/http_connection_manager.proto
 static_resources:
   listeners:
   - name: listener_https
@@ -25,6 +26,9 @@ static_resources:
               domains: ["*"]
               routes:
               - match: {prefix: "/api"}
+                route:
+                  cluster: api_service
+              - match: {prefix: "/grpc"}
                 route:
                   cluster: api_service
               - match: {prefix: "/"}

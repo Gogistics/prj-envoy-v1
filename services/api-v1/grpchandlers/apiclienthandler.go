@@ -31,7 +31,7 @@ var (
 		Client: &(gRPCAPIClient{
 			serverAddr:      "172.10.0.200:443",
 			skipHealthCheck: true,
-			caCert:          "certs/atai-envoy.com.crt", // grpc need atai-envoy.com.crt
+			caCert:          "atai-envoy.com.crt",
 			serverName:      "atai-envoy.com",
 		})}
 )

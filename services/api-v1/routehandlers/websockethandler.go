@@ -1,7 +1,6 @@
 package routehandlers
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -16,9 +15,9 @@ var (
 
 func (wrapper WebsocketWrapper) Communicate(respWriter http.ResponseWriter, req *http.Request) {
 	/*
-		   Ref:
-			https://yalantis.com/blog/how-to-build-websockets-in-go/
-			https://github.com/gobwas/ws
+		Ref:
+		https://yalantis.com/blog/how-to-build-websockets-in-go/
+		https://github.com/gobwas/ws
 	*/
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -38,7 +37,7 @@ func (wrapper WebsocketWrapper) Communicate(respWriter http.ResponseWriter, req 
 		}
 
 		// print msg
-		fmt.Printf("%s sent: %s\n", conn.RemoteAddr(), string(msg))
+		log.Printf("%s sent: %s\n", conn.RemoteAddr(), string(msg))
 
 		// Write msg back to client
 		if errWriteMsg := conn.WriteMessage(msgType, msg); errWriteMsg != nil {

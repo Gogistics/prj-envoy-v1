@@ -51,8 +51,17 @@ container_image(
     ],
     ports = [
         "443",
-        "80",
     ],
-    repository = "alantai",
+    repository = "alantai/prj-envoy-v1",
     visibility = ["//visibility:public"],
+)
+
+# declare where and how the image will be published
+container_push(
+    name = "push-nginx",
+    format = "Docker",
+    image = ":nginx-v0.0.0",
+    registry = "index.docker.io",
+    repository = "alantai/prj-envoy-v1",
+    tag = "nginx-v0.0.0",
 )

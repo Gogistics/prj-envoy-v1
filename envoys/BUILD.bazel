@@ -51,7 +51,7 @@ container_image(
         ":certs",
         ":front-proxy-config-execution",
     ],
-    repository = "alantai",
+    repository = "alantai/prj-envoy-v1",
     visibility = ["//visibility:public"],
 )
 
@@ -64,7 +64,7 @@ container_image(
     files = [
         ":redis-config-execution",
     ],
-    repository = "alantai",
+    repository = "alantai/prj-envoy-v1",
     visibility = ["//visibility:public"],
 )
 
@@ -77,7 +77,7 @@ container_image(
     files = [
         ":mongo-config-execution",
     ],
-    repository = "alantai",
+    repository = "alantai/prj-envoy-v1",
     visibility = ["//visibility:public"],
 )
 
@@ -91,6 +91,44 @@ container_image(
         ":certs",
         ":grpc-client-proxy-config-execution",
     ],
-    repository = "alantai",
+    repository = "alantai/prj-envoy-v1",
     visibility = ["//visibility:public"],
 )
+
+# declare where and how the image will be published
+container_push(
+    name = "push-front-envoy",
+    format = "Docker",
+    image = ":front-envoy-v0.0.0",
+    tag = "front-envoy-v0.0.0",
+    registry = "index.docker.io",
+    repository = "alantai/prj-envoy-v1",
+)
+
+container_push(
+    name = "push-redis-envoy",
+    format = "Docker",
+    image = ":redis-envoy-v0.0.0",
+    tag = "redis-envoy-v0.0.0",
+    registry = "index.docker.io",
+    repository = "alantai/prj-envoy-v1",
+)
+
+container_push(
+    name = "push-mongo-envoy",
+    format = "Docker",
+    image = ":mongo-envoy-v0.0.0",
+    tag = "mongo-envoy-v0.0.0",
+    registry = "index.docker.io",
+    repository = "alantai/prj-envoy-v1",
+)
+
+container_push(
+    name = "push-grpc-client-envoy",
+    format = "Docker",
+    image = ":grpc-client-envoy-v0.0.0",
+    tag = "grpc-client-envoy-v0.0.0",
+    registry = "index.docker.io",
+    repository = "alantai/prj-envoy-v1",
+)
+

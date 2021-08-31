@@ -166,7 +166,7 @@ func main() {
 		*caCert = "atai-envoy.com.crt"
 	}
 	var tlsCfg tls.Config
-	rootCAs := x509.NewCertPool()
+	rootCAs := x509.NewCertPool() // fix unknown certificate error
 	pem, err := ioutil.ReadFile(*caCert)
 	if err != nil {
 		log.Fatalf("failed to load root CA certificates  error=%v", err)
@@ -178,11 +178,6 @@ func main() {
 	tlsCfg.ServerName = *serverName
 
 	creds := credentials.NewTLS(&tlsCfg)
-
-	// creds, err := credentials.NewClientTLSFromFile(*caCert, *serverName)
-	// if err != nil {
-	// 	log.Fatalf("Error: failed to create TLS credentials %v", err)
-	// }
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 	opts = append(opts, grpc.WithBlock())
 	log.Println("Dialing RPC server...")

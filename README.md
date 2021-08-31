@@ -1,4 +1,4 @@
-# Tutorial of Envoy, etc. (WIP)
+# Tutorial of Envoy, etc.
 This tutorial aims to share my experience of using Envoy. The demo is going to show you how to deploy Enovy proxies, web app in Golang, Redis, Mongo, and Nginx, and have them communicate with each other. With the basic understanding of the communicaiton between components, we will be able to debug the issues of service mesh more efficiently. Slides are [here](https://docs.google.com/presentation/d/1Pwcz2QOR7TnffP0VgZ8zxweUiakeF46V6VoPI_gt3rc/edit?usp=sharing).
 
 
@@ -22,11 +22,22 @@ Envoy is a high-performance communication bus designed for large modern service-
 * Scalability/extendability
 
 
-## Demo (WIP)
-[Demo diagram](https://drive.google.com/file/d/1vxLz5n-xSXl-OgHwXULtl5MUyzSk7Sdg/view?usp=sharing)
+## Demo
+In this demo, we are going to spin up a full container topology illustrated in [demo diagram](https://drive.google.com/file/d/1vxLz5n-xSXl-OgHwXULtl5MUyzSk7Sdg/view?usp=sharing). All Docker images are stored at [DockerHub](https://hub.docker.com/repository/docker/alantai/prj-envoy-v1)
 
-Steps of running the demo are as follows:
+Basically, the topology comprises the components as follows:
+* Envoy proxies
+* API applications written in Golang
+* Nginx CDNs
+* MongoDB
+* Redis
+* gRPC server and client
 
+
+### Prerequisites
+Install Docker, Bazel, etc.
+
+### Steps of running the demo:
 1. Create certs
 
 ```sh
@@ -118,31 +129,25 @@ $ openssl x509 -req \
 # Signature ok
 # subject=/C=US/ST=CA/O=GOGISTICS, Inc./CN=atai-envoy.com
 # Getting CA Private Key
-
-# for grpc
-$ openssl x509 -req \
-     -in certs/grpc.atai-envoy.com.csr \
-     -CA certs/ca.crt \
-     -CAkey certs/ca.key \
-     -CAcreateserial \
-     -extfile <(printf "subjectAltName=DNS:atai-envoy.com") \
-     -out certs/grpc.atai-envoy.com.crt \
-     -days 500 \
-     -sha256
-# Signature ok
-# subject=/C=US/ST=CA/O=GOGISTICS, Inc./CN=atai-envoy.com
-# Getting CA Private Key
 # \generate certificates for each proxy
 ```
 
-
-2. Build API app in Golang
+2. Create the Docker networks
 ```sh
-# create a git repo. in cloud and come back to the project repo. to init Golang mod
+# run the command to init two networks for future development
+$ ./utils/scripts/init_networks.sh
+
+```
+
+3. Build API app in Golang
+```sh
+# create a git repo. in cloud and come back to the project root to init Golang mod
 $ go mod init github.com/Gogistics/prj-envoy-v1
 
 # add module requirements and sums
 $ go mod tidy
+
+# then start to write the app in Golang; personally I always create a Docker container for running the app written in Golang
 ```
 
 Notes of developing Golang locally
@@ -180,8 +185,7 @@ $ go run main -dev
 
 ```
 
-
-3. General setup and build by Bazel
+4. General setup and build by Bazel
 Write WORKSPACE and its corresponding BUILD.bazel and run the following commands
 ```sh
 # run the gazelle target specified in the BUILD file
@@ -210,7 +214,6 @@ $ docker run -d \
     --log-opt max-size=100m \
     --log-opt max-file=5 \
     alantai/services/api-v1:api-v0.0.0
-
 
 $ curl -k https://0.0.0.0:8443/api/v1 -vvv
 # *   Trying 0.0.0.0...
@@ -268,9 +271,20 @@ $ docker login
 
 4. Build Docker images and run all containers
 ```sh
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:all
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:all
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/api-v1:all
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/grpc-v1/server:all
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/grpc-v1/client:all
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:all
 
 # Or run build one by one
+
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:mongo-standalone-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:mongo-standalone-v0.0.0
+
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:redis-standalone-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:redis-standalone-v0.0.0
 
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:front-envoy-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:front-envoy-v0.0.0
@@ -281,43 +295,63 @@ $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:re
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:mongo-envoy-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:mongo-envoy-v0.0.0
 
-$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:mongo-v0.0.0
-$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:mongo-v0.0.0
-
-$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:nginx-v0.0.0
-$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:nginx-v0.0.0
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:grpc-client-envoy-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:grpc-client-envoy-v0.0.0
 
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/api-v1:api-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/api-v1:api-v0.0.0
 
-$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:grpc-client-envoy-v0.0.0
-$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:grpc-client-envoy-v0.0.0
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/grpc-v1/server:grpc-query-server-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/grpc-v1/server:grpc-query-server-v0.0.0
+
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/grpc-v1/client:grpc-query-client-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/grpc-v1/client:grpc-query-client-v0.0.0
+
+$ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:nginx-v0.0.0
+$ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:nginx-v0.0.0
+
+# login to the registry and push the docker image to the container registry
+$ docker login
+
+$ bazel run //databases:push-mongo-standalone
+$ bazel run //databases:push-redis-standalone
+
+$ bazel run //envoys:push-front-envoy
+$ bazel run //envoys:push-redis-envoy
+$ bazel run //envoys:push-mongo-envoy
+$ bazel run //envoys:push-grpc-client-envoy
+
+$ bazel run //services/api-v1:push-api
+$ bazel run //services/grpc-v1/server:push-grpc-query-server
+$ bazel run //services/grpc-v1/client:push-grpc-query-client
+$ bazel run //services/nginx-v1:push-nginx
+# \login to the registry and push the docker image to the container registry
 
 # run redis
 $ docker run -d \
     --name redis_standalone \
     --network atai_envoy \
     --ip "172.10.0.61" \
-    redis:alpine
+    alantai/prj-envoy-v1/databases:redis-standalone-v0.0.0
 
 # run mongo
 $ docker run -d \
     --name mongo_standalone \
     --network atai_envoy \
     --ip "172.10.0.71" \
-    alantai/databases:mongo-v0.0.0
+    alantai/prj-envoy-v1/databases:mongo-standalone-v0.0.0
 
 # run nginx to serve frontend static files
 $ docker run -d \
     --name nginx_web_server_1 \
     --network atai_envoy \
     --ip "172.10.0.111" \
-    alantai/services/nginx-v1:nginx-v0.0.0
+    alantai/prj-envoy-v1/services/nginx-v1:nginx-v0.0.0
 $ docker run -d \
     --name nginx_web_server_2 \
     --network atai_envoy \
     --ip "172.10.0.112" \
-    alantai/services/nginx-v1:nginx-v0.0.0
+    alantai/prj-envoy-v1/services/nginx-v1:nginx-v0.0.0
 
 # run envoy front proxy
 # note: -p 10000:10000 -p 8001:8001 for demo /admin
@@ -330,7 +364,7 @@ $ docker run -d \
       --log-opt max-buffer-size=5m \
       --log-opt max-size=100m \
       --log-opt max-file=5 \
-      alantai/envoys:front-envoy-v0.0.0
+      alantai/prj-envoy-v1/envoys:front-envoy-v0.0.0
 
 # run envoy proxy of redis
 $ docker run -d \
@@ -341,7 +375,7 @@ $ docker run -d \
       --log-opt max-buffer-size=5m \
       --log-opt max-size=100m \
       --log-opt max-file=5 \
-      alantai/envoys:redis-envoy-v0.0.0
+      alantai/prj-envoy-v1/envoys:redis-envoy-v0.0.0
 
 # run envoy proxy of mongo
 $ docker run -d \
@@ -352,7 +386,7 @@ $ docker run -d \
       --log-opt max-buffer-size=5m \
       --log-opt max-size=100m \
       --log-opt max-file=5 \
-      alantai/envoys:mongo-envoy-v0.0.0
+      alantai/prj-envoy-v1/envoys:mongo-envoy-v0.0.0
 
 # run grpc proxy
 $ docker run -d \
@@ -363,11 +397,34 @@ $ docker run -d \
       --log-opt max-buffer-size=5m \
       --log-opt max-size=100m \
       --log-opt max-file=5 \
-      alantai/envoys:grpc-client-envoy-v0.0.0
+      alantai/prj-envoy-v1/envoys:grpc-client-envoy-v0.0.0
 
 # connect atai_envoy_grpc_client to the other network, atai_grpc
 $ docker network connect atai_grpc atai_envoy_grpc_client
 # \run grpc proxy
+
+# run grpc
+$ docker run \
+    -itd \
+    --name atai_grpc_server \
+    --network atai_grpc \
+    --ip "172.11.0.11" \
+    -p 20000:20000 \
+    alantai/prj-envoy-v1/services/grpc-v1/server:grpc-query-server-v0.0.0 \
+    --port ":20000" \
+    --certFile "atai-envoy.com.crt" \
+    --keyFile "atai-envoy.com.key"
+
+$ docker run \
+    -itd \
+    --name atai_grpc_client \
+    --network atai_grpc \
+    --ip "172.11.0.12" \
+    alantai/prj-envoy-v1/services/grpc-v1/client:grpc-query-client-v0.0.0 \
+    --caCert "atai-envoy.com.crt" \
+    --serverName "atai-envoy.com" \
+    --serverAddr "172.11.0.11:20000"
+# \run grpc
 
 # run api service
 $ docker run -d \
@@ -378,7 +435,7 @@ $ docker run -d \
     --log-opt max-buffer-size=5m \
     --log-opt max-size=100m \
     --log-opt max-file=5 \
-    alantai/services/api-v1:api-v0.0.0
+    alantai/prj-envoy-v1/services/api-v1:api-v0.0.0
 
 $ docker run -d \
     --name atai_service_api_v1_2 \
@@ -388,10 +445,15 @@ $ docker run -d \
     --log-opt max-buffer-size=5m \
     --log-opt max-size=100m \
     --log-opt max-file=5 \
-    alantai/services/api-v1:api-v0.0.0
+    alantai/prj-envoy-v1/services/api-v1:api-v0.0.0
 # \run api service
+```
 
+### Testing
+Since the error handlers have not been completely implemented yet, the invalid requests would break the api applications.
 
+1. Test API service and Nginx
+```sh
 # run service proxy and the api containers to test the api service; edit /etc/hosts by adding 0.0.0.0 atai-envoy.com
 $ curl -k -vvv https://atai-envoy.com/api/v1
 # *   Trying 0.0.0.0...
@@ -442,6 +504,9 @@ $ curl -k -vvv https://atai-envoy.com/api/v1
 # * Connection #0 to host atai-envoy.com left intact
 # {"Name":"Alan","Hostname":"1cfccd1c9a0a","Hobbies":["workout","programming","driving"]}* Closing connection 0
 
+# post data to mongo and get data from mongo
+$ curl -k -d "userName=alan" -X POST https://atai-envoy.com/api/v1/visitor
+$ curl -k https://atai-envoy.com/api/v1/visitor
 
 # test nginx servers
 $ curl -k -vvv https://atai-envoy.com
@@ -508,14 +573,20 @@ $ curl -k -vvv https://atai-envoy.com
 # </body></html>* Closing connection 0
 ```
 
+2. Test Envoy observability http://0.0.0.0:8001
 
-### MIS
+
+## MIS
 * Docker
 ```sh
 # remove images with tag <none>
 $ docker rmi $(docker images --filter "dangling=true")
 
 ```
+
+* Build Angular by Bazel
+Ref:
+- https://blog.bitsrc.io/angular-8-bazel-walkthrough-f7585bcaf282
 
 * MongoDB
 

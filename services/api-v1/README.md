@@ -1,4 +1,4 @@
 # API service
 
 ## Notes:
-* ./certs is for development only
+* ./certs is for local development
