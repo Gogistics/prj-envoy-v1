@@ -46,7 +46,7 @@ container_push(
     name = "push-grpc-query-client",
     format = "Docker",
     image = ":grpc-query-client-v0.0.0",
-    tag = "grpc-query-client-v0.0.0",
     registry = "index.docker.io",
     repository = "alantai/prj-envoy-v1",
+    tag = "grpc-query-client-v0.0.0",
 )

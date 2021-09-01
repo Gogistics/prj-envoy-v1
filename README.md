@@ -540,6 +540,8 @@ $ curl -k -vvv https://atai-envoy.com/api/v1
 $ curl -k -d "userName=alan" -X POST https://atai-envoy.com/api/v1/visitor
 $ curl -k https://atai-envoy.com/api/v1/visitor
 
+# TODO: test websocket by websocat or Chrome
+
 # test nginx servers by running the command below or just visit the website from Chrome. If you encounter a warning related to self-signed certificate, type "thisisunsafe".
 $ curl -k -vvv https://atai-envoy.com
 # *   Trying 0.0.0.0...
@@ -621,7 +623,6 @@ Ref:
 - https://blog.bitsrc.io/angular-8-bazel-walkthrough-f7585bcaf282
 
 * MongoDB
-
 Ref:
 - https://docs.mongodb.com/v4.0/reference/
 

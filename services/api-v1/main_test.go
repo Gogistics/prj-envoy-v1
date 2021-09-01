@@ -22,7 +22,7 @@ func TestRouter(t *testing.T) {
 
 	// The mock server we created runs a server and exposes its location in the
 	// URL attribute
-	// We make a GET request to the "hello" route we defined in the router
+	// We make a GET request to the "/api/v1" route we defined in the router
 	resp, err := http.Get(mockServer.URL + "/api/v1")
 
 	// Handle any unexpected error

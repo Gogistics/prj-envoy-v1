@@ -18,6 +18,8 @@ static_resources:
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
           stat_prefix: ingress_http
+          upgrade_configs:
+          - upgrade_type: websocket
           http_filters:
           - name: envoy.filters.http.router
           route_config:
@@ -26,6 +28,10 @@ static_resources:
               domains: ["*"]
               routes:
               - match: {prefix: "/api"}
+                route:
+                  cluster: api_service
+              - match:
+                  prefix: "/ws"
                 route:
                   cluster: api_service
               - match: {prefix: "/grpc"}

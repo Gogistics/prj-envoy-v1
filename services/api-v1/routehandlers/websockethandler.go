@@ -26,7 +26,7 @@ func (wrapper WebsocketWrapper) Communicate(respWriter http.ResponseWriter, req 
 
 	conn, errConn := upgrader.Upgrade(respWriter, req, nil)
 	if errConn != nil {
-		log.Fatal("WS failed to build connection")
+		log.Fatalf("Error: WS failed to build connection. ", errConn)
 		return
 	}
 

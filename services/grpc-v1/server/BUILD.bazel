@@ -49,7 +49,7 @@ container_push(
     name = "push-grpc-query-server",
     format = "Docker",
     image = ":grpc-query-server-v0.0.0",
-    tag = "grpc-query-server-v0.0.0",
     registry = "index.docker.io",
     repository = "alantai/prj-envoy-v1",
+    tag = "grpc-query-server-v0.0.0",
 )
