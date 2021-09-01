@@ -37,18 +37,16 @@ And the folder directories are as follows:
 * ./databases/ contains a Bazel file for building database Docker images; in this demo, Redis and Mongo standalone will be built.
 * ./envoys/ contains a Bazel file for building Envoy Docker images; in this demo, there are four kinds of Envoy proxies will be built.
 * ./services/ contains api-v1/, grpc-v1/, nginx-v1/, web-frontend-angular/, and web-frontend-react/. api-v1/ is for developing API application in Golang and a Bazel file for building API Docker image, grpc-v1/ is for developing gRPC server and client in Golang and Bazel files for building their Docker images. nginx-v1/ contains a Bazel file for building Nginx Docker image.
-* ./utils/
+* ./utils/ contains certs/, configs/, dockerfiles/, and scripts/
 
 
 ### Context
 Based on the topology, what we want to achieve are as follows:
-* End users interact with remote the API service thorugh Envoy frontend proxy.
+* End users interact with the remote API service through Envoy front proxy.
 * The API service interacts with Redis, Mongo, and gRPC server throught different kinds of Envoy proxies.
-
 
 ### Prerequisites
 Install Docker, Bazel, etc. on the Linux environment. I wrote this demo and built the whole topology on my Macbook Pro.
-
 
 ### Steps of building this demo from scratch
 1. Draw the network/container topology
@@ -59,7 +57,7 @@ Install Docker, Bazel, etc. on the Linux environment. I wrote this demo and buil
 
 - Create certs
 ```sh
-$ cd infra/
+$ cd utils/
 
 # create a cert authority
 $ openssl genrsa -out certs/ca.key 4096
@@ -161,7 +159,14 @@ $ go mod tidy
 # For example, let's write a app in Golang and connect it to Redis and Mongo.
 
 # 1. bring up redis and mongo
-# build and run redis and mongo
+
+# build and run redis and mongo by Bazel and Docker
+# run the gazelle target specified in the BUILD file
+$ bazel run //:gazelle
+
+# update repos deps
+$ bazel run //:gazelle -- update-repos -from_file=go.mod -to_macro=deps.bzl%go_dependencies
+
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
     //databases:redis-standalone-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
@@ -198,10 +203,13 @@ $ docker run --name atai-go-dev \
 # 4. run golang app in dev mode if a flag, dev, set for running the app dev mode
 $ go run main -dev
 
-# then exec into the same container from the other terminal to test the Golang app which you just brought up
+# 5. then exec into the same container from the other terminal to test the Golang app which you just brought up
+# go into the container
 $ docker exec -it atai-go-dev sh
-```
 
+# test the app by curl
+$ curl -k https://0.0.0.0/api/v1
+```
 
 ### Steps of bringing up the whole topology with the existing code
 1. Create certs (optional because all certs have been generated under ./utils/certs/)
@@ -210,7 +218,6 @@ $ docker exec -it atai-go-dev sh
 ```sh
 # run the command to init two networks for future development
 $ ./utils/scripts/init_networks.sh
-
 ```
 
 3. Build by Bazel
@@ -291,10 +298,9 @@ $ curl -k -vvv https://0.0.0.0:8443/api/v1
 # * Connection #0 to host 0.0.0.0 left intact
 # {"Name":"Alan","Hostname":"1cfccd1c9a0a","Hobbies":["workout","programming","driving"]}* Closing connection 0
 
-# take down the container
+# remove the container
 $ docker rm -f atai_envoy_service_api_v1
 # \3. test the API app from outside the container (optional
-
 
 # 4. build all Docker images
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:all
@@ -380,10 +386,10 @@ $ docker run -d \
     alantai/prj-envoy-v1/services/nginx-v1:nginx-v0.0.0
 
 # run envoy front proxy
-# note: -p 10000:10000 -p 8001:8001 for demo /admin
+# note: -p 8001:8001 for demo /admin
 $ docker run -d \
       --name atai_envoy_front \
-      -p 80:80 -p 443:443 -p 10000:10000 -p 8001:8001 \
+      -p 80:80 -p 443:443 -p 8001:8001 \
       --network atai_envoy \
       --ip "172.10.0.10" \
       --log-opt mode=non-blocking \
