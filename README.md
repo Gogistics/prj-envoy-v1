@@ -611,11 +611,14 @@ $ curl -k -vvv https://atai-envoy.com
 
 
 ## MIS
+* Golang
+Ref:
+- https://github.com/golang/go/wiki/CodeReviewComments
+
 * Docker
 ```sh
 # remove images with tag <none>
 $ docker rmi $(docker images --filter "dangling=true")
-
 ```
 
 * Build Angular by Bazel
