@@ -3,9 +3,11 @@ package dbhandlers
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/gorilla/sessions"
 )
 
 type RedisClientWrapper struct {
@@ -31,6 +33,8 @@ var (
 			PoolSize:     20,
 			PoolTimeout:  30 * time.Second,
 		})}
+	// TODO: get session through flag
+	store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 )
 
 func (wrapper RedisClientWrapper) Set(key string, val []byte) error {

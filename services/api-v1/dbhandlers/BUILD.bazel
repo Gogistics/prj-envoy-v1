@@ -10,6 +10,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_go_redis_redis_v8//:redis",
+        "@com_github_gorilla_sessions//:go_default_library",
         "@org_mongodb_go_mongo_driver//bson",
         "@org_mongodb_go_mongo_driver//bson/primitive",
         "@org_mongodb_go_mongo_driver//mongo",

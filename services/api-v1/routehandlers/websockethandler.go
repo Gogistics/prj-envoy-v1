@@ -14,10 +14,11 @@ var (
 )
 
 func (wrapper WebsocketWrapper) Communicate(respWriter http.ResponseWriter, req *http.Request) {
-	/*
-		Ref:
-		https://yalantis.com/blog/how-to-build-websockets-in-go/
-		https://github.com/gobwas/ws
+	/* Notes
+	Ref:
+	- https://datatracker.ietf.org/doc/html/rfc6455
+	- https://yalantis.com/blog/how-to-build-websockets-in-go/
+	- https://github.com/gobwas/ws
 	*/
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
