@@ -17,6 +17,11 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
+/* Notes
+ref:
+- https://datatracker.ietf.org/doc/html/draft-kumar-rtgwg-grpc-protocol-00
+*/
+
 var (
 	serverAddr      = flag.String("serverAddr", "172.11.0.11:20000", "host:port of gRPC server")
 	skipHealthCheck = flag.Bool("skipHealthCheck", false, "Skip Initial Healthcheck")

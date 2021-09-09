@@ -3,8 +3,11 @@ syntax = "proto3";
 package protos;
 option go_package = "github.com/Gogistics/prj-envoy-v1/services/grpc-v1/protos";
 
-
-// ref: https://stackoverflow.com/questions/43167762/how-to-return-an-array-in-protobuf-service-rpc
+/* Notes
+ref:
+- https://datatracker.ietf.org/doc/html/draft-kumar-rtgwg-grpc-protocol-00
+- https://stackoverflow.com/questions/43167762/how-to-return-an-array-in-protobuf-service-rpc
+*/
 service ServiceIPMapping {
     // simple RPC
     //  a service with an empty name is returned if there is no service related to the query

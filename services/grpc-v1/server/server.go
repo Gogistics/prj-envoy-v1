@@ -19,6 +19,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+/* Notes
+ref:
+- https://datatracker.ietf.org/doc/html/draft-kumar-rtgwg-grpc-protocol-00
+*/
+
 type healthServer struct{}
 type grpcServer struct{}
 
