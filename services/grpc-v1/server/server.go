@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"time"
 
 	"github.com/Gogistics/prj-envoy-v1/services/grpc-v1/protos"
 	"github.com/google/uuid"
@@ -14,6 +15,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/status"
 )
 
@@ -72,7 +74,7 @@ func (rpcServer *grpcServer) QueryServiceServerStream(srvQuery *protos.ServiceRe
 }
 
 func (rpcServer *grpcServer) QueryServiceClientStream(stream protos.ServiceIPMapping_QueryServiceClientStreamServer) error {
-	// TODO:
+	// TODO: replace hardcode with test data
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
@@ -132,7 +134,24 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to generate credentials %v", err)
 	}
-	serverOptions = []grpc.ServerOption{grpc.Creds(creds)}
+
+	/* Config. guide
+	ref:
+	- https://github.com/grpc/grpc-go/blob/v1.40.0/server.go#L143
+	- https://lukexng.medium.com/grpc-keepalive-maxconnectionage-maxconnectionagegrace-6352909c57b8
+	*/
+	serverOptions = []grpc.ServerOption{
+		grpc.Creds(creds),
+		grpc.NumStreamWorkers(10),
+		grpc.ConnectionTimeout(30 * time.Second),
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime:             5 * time.Second,
+			PermitWithoutStream: true,
+		}),
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			MaxConnectionAge:      10 * time.Second,
+			MaxConnectionAgeGrace: 30 * time.Second}),
+		grpc.MaxHeaderListSize(10240)}
 
 	rpcServer := grpc.NewServer(serverOptions...)
 	protos.RegisterServiceIPMappingServer(rpcServer, &grpcServer{})

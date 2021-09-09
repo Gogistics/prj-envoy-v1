@@ -4,14 +4,16 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/Gogistics/prj-envoy-v1/services/api-v1/routehandlers"
 	"github.com/gorilla/mux"
 )
 
-/* ref:
-https://pkg.go.dev/net/http#pkg-constants
-https://pkg.go.dev/flag
+/* Notes:
+ref:
+- https://pkg.go.dev/net/http#pkg-constants
+- https://pkg.go.dev/flag
 */
 
 // Note: The new router function creates the router and
@@ -39,7 +41,9 @@ func main() {
 
 	// The router is now formed by calling the `newRouter` constructor function
 	// that we defined above. The rest of the code stays the same
-	r := newRouter()
+	appRouter := newRouter()
+
+	// TODO: move tls config. to config. handler
 	var crtPath string
 	var keyPath string
 	if *dev {
@@ -49,7 +53,22 @@ func main() {
 		crtPath = "atai-envoy.com.crt"
 		keyPath = "atai-envoy.com.key"
 	}
-	err := http.ListenAndServeTLS(":443", crtPath, keyPath, r)
+
+	/* Notes
+	Follow Gorilla README to set timeouts to avoid Slowloris attacks.
+	ref:
+	- https://github.com/gorilla/mux/blob/d07530f46e1eec4e40346e24af34dcc6750ad39f/README.md
+	*/
+	appServer := &http.Server{
+		Addr:           ":443",
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		IdleTimeout:    30 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+		Handler:        appRouter,
+	}
+
+	err := appServer.ListenAndServeTLS(crtPath, keyPath)
 	if err != nil {
 		log.Fatal("ListenAndServeTLS: ", err)
 	}
