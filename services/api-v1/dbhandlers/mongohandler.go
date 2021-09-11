@@ -12,13 +12,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// MongoClientWrapper struct of mongodb client wrapper
 type MongoClientWrapper struct {
 	Client *mongo.Client
 }
 
 var (
-	MongoWrapper = MongoClientWrapper{
-		getMongoClient()}
+	// MongoWrapper is a object of client wrapper
+	MongoWrapper = MongoClientWrapper{getMongoClient()}
 )
 
 func getMongoClient() *mongo.Client {
@@ -41,6 +42,7 @@ func getMongoClient() *mongo.Client {
 	return client
 }
 
+// InsertOne is a simple operation of inserting document into collection
 func (wrapper MongoClientWrapper) InsertOne(val string) error {
 	coll := wrapper.Client.Database("web").Collection("test")
 	resp, err := coll.InsertOne(context.TODO(), bson.M{"userName": val})
@@ -52,8 +54,10 @@ func (wrapper MongoClientWrapper) InsertOne(val string) error {
 	return nil
 }
 
-/* Ref:
-   https://pkg.go.dev/go.mongodb.org/mongo-driver/mongo#Collection.FindOneAndUpdate
+// FindOneAndUpdate an operation of updating data if exist and insert new document if not exist
+/*
+Ref:
+- https://pkg.go.dev/go.mongodb.org/mongo-driver/mongo#Collection.FindOneAndUpdate
 */
 func (wrapper MongoClientWrapper) FindOneAndUpdate(key string, val string, newData *map[string]string) (string, error) {
 	coll := wrapper.Client.Database("web").Collection("test")
@@ -87,10 +91,11 @@ func (wrapper MongoClientWrapper) FindOneAndUpdate(key string, val string, newDa
 	if !ok {
 		fmt.Println("_id does not exist in the updatedDocument map")
 	}
-	strObjId := id.(primitive.ObjectID).Hex()
-	return strObjId, nil
+	strObjID := id.(primitive.ObjectID).Hex()
+	return strObjID, nil
 }
 
+// Find a simple operation of querying document by value
 /* Ref:
    https://pkg.go.dev/go.mongodb.org/mongo-driver/mongo#Collection.Find
 */
@@ -117,6 +122,7 @@ func (wrapper MongoClientWrapper) Find(key *string, val *string) []bson.M {
 	return results
 }
 
+// FindID a simple operation of querying document by ID
 func (wrapper MongoClientWrapper) FindID(key string, val string) (string, error) {
 	var result bson.M
 

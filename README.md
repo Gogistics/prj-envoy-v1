@@ -146,7 +146,7 @@ $ openssl x509 -req \
 # \generate certificates for each proxy
 ```
 
-- Develop and build API app in Golang
+- Develop and build API app in Golang [design diagram of the web application in Golang](https://drive.google.com/file/d/1Jw5kNCA2c-gVy2K7fdNEpEF7b-0X1sQM/view?usp=sharing)
 ```sh
 # create a git repo. in cloud and come back to the project root to init a Golang mod
 $ go mod init github.com/Gogistics/prj-envoy-v1
@@ -239,7 +239,8 @@ $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 \
     //services/api-v1:api-v0.0.0
 
 # after building the image, check if the image exists
-$ docker images # in my case, the image repository is alantai/api-app and the tag is atai-v0.0.0
+# in my case, the image repository is alantai/api-app and the tag is atai-v0.0.0
+$ docker images
 
 # test image by spinning up an api container
 $ docker run -d \

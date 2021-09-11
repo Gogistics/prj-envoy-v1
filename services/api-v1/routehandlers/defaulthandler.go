@@ -13,10 +13,12 @@ import (
 	"github.com/Gogistics/prj-envoy-v1/services/api-v1/types"
 )
 
-type DefaultWrapper struct{}
+type DefaultHandler struct{}
 
 var (
-	Default DefaultWrapper
+	// Default object of handling default routes
+	Default      DefaultHandler
+	redisWrapper = dbhandlers.RedisWrapper
 )
 
 func countVisitorInfo(req *http.Request) {
@@ -24,7 +26,6 @@ func countVisitorInfo(req *http.Request) {
 	userAgent := req.Header.Get("User-Agent")
 
 	// redis operations
-	redisWrapper := dbhandlers.RedisWrapper
 	_, errIncrURL := redisWrapper.Incr(req.URL.Path)
 	if errIncrURL == nil {
 		redisWrapper.Expire(req.URL.Path, 5*time.Minute)
@@ -36,7 +37,7 @@ func countVisitorInfo(req *http.Request) {
 
 }
 
-func (wrapper DefaultWrapper) HelloGRPC(respWriter http.ResponseWriter, req *http.Request) {
+func (handler DefaultHandler) HelloGRPC(respWriter http.ResponseWriter, req *http.Request) {
 	countVisitorInfo(req)
 
 	// TODO: handle errors and add timeout
@@ -46,7 +47,7 @@ func (wrapper DefaultWrapper) HelloGRPC(respWriter http.ResponseWriter, req *htt
 	respWriter.Write([]byte("Request has been accepted and in processing"))
 }
 
-func (wrapper DefaultWrapper) Hello(respWriter http.ResponseWriter, req *http.Request) {
+func (handler DefaultHandler) Hello(respWriter http.ResponseWriter, req *http.Request) {
 	countVisitorInfo(req)
 	remoteAddr, _, err := net.SplitHostPort(req.RemoteAddr)
 
@@ -74,7 +75,7 @@ func (wrapper DefaultWrapper) Hello(respWriter http.ResponseWriter, req *http.Re
 	}
 }
 
-func (wrapper DefaultWrapper) PostVisitor(respWriter http.ResponseWriter, req *http.Request) {
+func (handler DefaultHandler) PostVisitor(respWriter http.ResponseWriter, req *http.Request) {
 	countVisitorInfo(req)
 
 	userAgent := req.Header.Get("User-Agent")
@@ -100,7 +101,7 @@ func (wrapper DefaultWrapper) PostVisitor(respWriter http.ResponseWriter, req *h
 	respWriter.Write([]byte("Request has been handled successfully"))
 }
 
-func (wrapper DefaultWrapper) GetVisitor(respWriter http.ResponseWriter, req *http.Request) {
+func (handler DefaultHandler) GetVisitor(respWriter http.ResponseWriter, req *http.Request) {
 	countVisitorInfo(req)
 	// default return all visitors info from mongo
 	mongoWrapper := dbhandlers.MongoWrapper

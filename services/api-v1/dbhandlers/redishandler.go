@@ -3,26 +3,33 @@ package dbhandlers
 import (
 	"context"
 	"log"
-	"os"
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/gorilla/sessions"
 )
 
+/* A Redis handler for handling data caching
+
+Ref. for using Redis:
+- https://github.com/go-redis/redis
+- https://redis.com/blog/connection-pools-for-serverless-functions-and-backend-services/
+- https://github.com/go-redis/redis/blob/master/example_test.go
+*/
+
+// RedisClientWrapper a struct of redis client wrapper
 type RedisClientWrapper struct {
 	Client *redis.Client
 }
 
-/* Ref. for using Redis:
-   https://github.com/go-redis/redis
-   https://redis.com/blog/connection-pools-for-serverless-functions-and-backend-services/
-   https://github.com/go-redis/redis/blob/master/example_test.go
-*/
 var (
 	ctx = context.Background()
+	// RedisWrapper a object of redis client wrapper
 	// 172.10.0.61 is the IP of redis standalone and 172.10.0.50 is the IP of envoy proxy
-	RedisWrapper = RedisClientWrapper{
+	RedisWrapper = initRedisClientWrapper()
+)
+
+func initRedisClientWrapper() RedisClientWrapper {
+	return RedisClientWrapper{
 		redis.NewClient(&redis.Options{
 			Addr:         "172.10.0.50:6379",
 			Password:     "", // no password set
@@ -33,11 +40,10 @@ var (
 			PoolSize:     20,
 			PoolTimeout:  30 * time.Second,
 		})}
-	// TODO: get session through flag
-	store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
-)
+}
 
-func (wrapper RedisClientWrapper) Set(key string, val []byte) error {
+// Set simple key-value pair
+func (wrapper *RedisClientWrapper) Set(key string, val []byte) error {
 	err := wrapper.Client.Set(ctx, key, val, 0).Err()
 	if err != nil {
 		log.Fatalln("Error: failed to set key-value pair. ", err)
@@ -45,7 +51,8 @@ func (wrapper RedisClientWrapper) Set(key string, val []byte) error {
 	return err
 }
 
-func (wrapper RedisClientWrapper) Incr(key string) (int64, error) {
+// Incr increase count of the key by one
+func (wrapper *RedisClientWrapper) Incr(key string) (int64, error) {
 	count, err := wrapper.Client.Incr(ctx, key).Result()
 	if err != nil {
 		log.Fatalln("Error: failed to Incr key. ", err)
@@ -54,7 +61,8 @@ func (wrapper RedisClientWrapper) Incr(key string) (int64, error) {
 	return count, nil
 }
 
-func (wrapper RedisClientWrapper) Expire(key string, expiration time.Duration) error {
+// Expire set expiration of key
+func (wrapper *RedisClientWrapper) Expire(key string, expiration time.Duration) error {
 	_, err := wrapper.Client.Expire(ctx, key, expiration).Result()
 	if err != nil {
 		log.Fatalln("Error: failed to set key expiration. ", err)
@@ -63,7 +71,8 @@ func (wrapper RedisClientWrapper) Expire(key string, expiration time.Duration) e
 	return nil
 }
 
-func (wrapper RedisClientWrapper) Get(key string) ([]byte, error) {
+// Get retrieve value by the key
+func (wrapper *RedisClientWrapper) Get(key string) ([]byte, error) {
 	val, err := wrapper.Client.Get(ctx, key).Result()
 	if err == redis.Nil {
 		log.Println("Error: key does not exist")

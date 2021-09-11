@@ -2,6 +2,8 @@ package utilhandlers
 
 import (
 	"crypto/tls"
+	"flag"
+	"log"
 	"net/http"
 	"time"
 
@@ -17,9 +19,9 @@ type appServerHandler struct {
 }
 
 var (
-	// The router is now formed by calling the `newRouter` constructor function
-	// that we defined above. The rest of the code stays the same
-	AppServerHandler = getWebServerHandler()
+	// AppServerHandler is the object handling server config. and init
+	AppServerHandler = initAppServerHandler()
+	dev              *bool
 )
 
 /* Notes
@@ -32,7 +34,38 @@ ref:
 - https://pkg.go.dev/flag
 */
 
-func newRouter() *mux.Router {
+func setFlagsVals() {
+	dev = flag.Bool("dev", false, "set app mode")
+	flag.Parse()
+}
+
+func getFlagVal(fg string) interface{} {
+	switch fg {
+	case "dev":
+		return dev
+	default:
+		log.Println("Warning: flag does not exist!")
+		return nil
+	}
+}
+
+func initAppServerHandler() appServerHandler {
+	setFlagsVals()
+	appModeInterface := getFlagVal("dev")
+	appMode := (*appModeInterface.(*bool))
+	var crtPath string
+	var keyPath string
+	if appMode {
+		crtPath = "certs/dev.atai-envoy.com.crt"
+		keyPath = "certs/atai-envoy.com.key"
+	} else {
+		crtPath = "atai-envoy.com.crt"
+		keyPath = "atai-envoy.com.key"
+	}
+	return appServerHandler{appRouter: getNewRouter(), appMode: appMode, crtPath: crtPath, keyPath: keyPath}
+}
+
+func getNewRouter() *mux.Router {
 	rtr := mux.NewRouter()
 	// general REST APIs
 	rtr.HandleFunc("/api/v1", routehandlers.Default.Hello).Methods(http.MethodGet)
@@ -48,21 +81,6 @@ func newRouter() *mux.Router {
 	return rtr
 }
 
-func getWebServerHandler() appServerHandler {
-	appModeInterface := FlagHandler.GetFlagVal("dev")
-	appMode := (*appModeInterface.(*bool))
-	var crtPath string
-	var keyPath string
-	if appMode {
-		crtPath = "certs/dev.atai-envoy.com.crt"
-		keyPath = "certs/atai-envoy.com.key"
-	} else {
-		crtPath = "atai-envoy.com.crt"
-		keyPath = "atai-envoy.com.key"
-	}
-	return appServerHandler{appRouter: newRouter(), appMode: appMode, crtPath: crtPath, keyPath: keyPath}
-}
-
 func (appSH *appServerHandler) GetCrtPath() string {
 	return appSH.crtPath
 }
@@ -71,7 +89,7 @@ func (appSH *appServerHandler) GetKeyPath() string {
 	return appSH.keyPath
 }
 
-func (appSH *appServerHandler) GetAppServer() *http.Server {
+func (appSH *appServerHandler) InitAppServer() *http.Server {
 	/* Notes
 	Follow Gorilla README to set timeouts to avoid Slowloris attacks.
 

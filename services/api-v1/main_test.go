@@ -8,13 +8,14 @@ import (
 	"testing"
 
 	"github.com/Gogistics/prj-envoy-v1/services/api-v1/types"
+	"github.com/Gogistics/prj-envoy-v1/services/api-v1/utilhandlers"
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestRouter(t *testing.T) {
 	// Instantiate the router using the constructor function that
 	// we defined previously
-	r := newRouter()
+	r := utilhandlers.GetNewRouter()
 
 	// Create a new server using the "httptest" libraries `NewServer` method
 	// Documentation : https://golang.org/pkg/net/http/httptest/#NewServer
