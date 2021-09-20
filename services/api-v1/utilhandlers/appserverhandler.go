@@ -34,6 +34,9 @@ ref:
 - https://pkg.go.dev/flag
 */
 
+/* Notes
+- setFlagsVals and getFlagVal can be moved to the other file under the same package; this way, flags can be accessible by different util handlers
+*/
 func setFlagsVals() {
 	dev = flag.Bool("dev", false, "set app mode")
 	flag.Parse()
@@ -81,15 +84,7 @@ func getNewRouter() *mux.Router {
 	return rtr
 }
 
-func (appSH *appServerHandler) GetCrtPath() string {
-	return appSH.crtPath
-}
-
-func (appSH *appServerHandler) GetKeyPath() string {
-	return appSH.keyPath
-}
-
-func (appSH *appServerHandler) InitAppServer() *http.Server {
+func (appSH *appServerHandler) InitAppServer() error {
 	/* Notes
 	Follow Gorilla README to set timeouts to avoid Slowloris attacks.
 
@@ -117,5 +112,5 @@ func (appSH *appServerHandler) InitAppServer() *http.Server {
 		TLSNextProto:   make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
 		Handler:        AppServerHandler.appRouter,
 	}
-	return appServer
+	return appServer.ListenAndServeTLS(appSH.crtPath, appSH.keyPath)
 }

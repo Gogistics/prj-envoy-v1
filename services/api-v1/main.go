@@ -10,9 +10,7 @@ import (
 - entry of the web app
 */
 func main() {
-	var crtPath string = utilhandlers.AppServerHandler.GetCrtPath()
-	var keyPath string = utilhandlers.AppServerHandler.GetKeyPath()
-	err := utilhandlers.AppServerHandler.InitAppServer().ListenAndServeTLS(crtPath, keyPath)
+	err := utilhandlers.AppServerHandler.InitAppServer()
 	if err != nil {
 		log.Fatal("ListenAndServeTLS: ", err)
 	}

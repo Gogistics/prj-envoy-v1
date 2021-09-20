@@ -56,6 +56,11 @@ Install Docker, Bazel, etc. on the Linux environment. I wrote this demo and buil
 5. Bring up all the Docker containers
 
 - Create certs
+Idealy for production applications, don't put the certs in the course code repository. If you're using Kubernetes, suggest reading sensitive data from [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/).
+
+
+For development, it's okay to generate certs and put them in the source code repository.
+
 ```sh
 $ cd utils/
 
@@ -81,11 +86,6 @@ $ openssl req -x509 -new -nodes -key certs/ca.key -sha256 -days 1024 -out certs/
 # Organizational Unit Name (eg, section) []:infra
 # Common Name (eg, fully qualified host name) []:
 # Email Address []:gogistics@gogistics-tw.com
-# Alans-MacBook-Pro-2:infra alantai$ 
-# Alans-MacBook-Pro-2:infra alantai$ 
-# Alans-MacBook-Pro-2:infra alantai$ 
-# Alans-MacBook-Pro-2:infra alantai$ 
-# Alans-MacBook-Pro-2:infra alantai$ openssl genrsa -out certs/atai-envoy.com.key 2048
 # Generating RSA private key, 2048 bit long modulus
 # ...............................................................+++
 # ..............................................+++
@@ -254,6 +254,7 @@ $ docker run -d \
     --log-opt max-file=5 \
     alantai/prj-envoy-v1/services/api-v1:api-v0.0.0
 
+# test the app by cURL
 $ curl -k -vvv https://0.0.0.0:8443/api/v1
 # *   Trying 0.0.0.0...
 # * TCP_NODELAY set
@@ -299,11 +300,11 @@ $ curl -k -vvv https://0.0.0.0:8443/api/v1
 # * Connection #0 to host 0.0.0.0 left intact
 # {"Name":"Alan","Hostname":"1cfccd1c9a0a","Hobbies":["workout","programming","driving"]}* Closing connection 0
 
-# remove the container
+# Once the testnig has been completed, remove the container by the following command
 $ docker rm -f atai_envoy_service_api_v1
 # \3. test the API app from outside the container (optional
 
-# 4. build all Docker images
+# 4. build all required Docker images
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:all
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //envoys:all
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/api-v1:all
