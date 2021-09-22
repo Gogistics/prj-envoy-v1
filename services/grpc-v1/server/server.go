@@ -21,6 +21,7 @@ import (
 
 /* Notes
 ref:
+- https://developers.google.com/protocol-buffers/docs/gotutorial
 - https://datatracker.ietf.org/doc/html/draft-kumar-rtgwg-grpc-protocol-00
 */
 
