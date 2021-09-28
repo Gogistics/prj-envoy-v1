@@ -615,19 +615,28 @@ $ curl -k -vvv https://atai-envoy.com
 ## MIS
 * Golang
 Ref:
-- https://github.com/golang/go/wiki/CodeReviewComments
+- [Golang code review](https://github.com/golang/go/wiki/CodeReviewComments)
+- [Scheduling in Golang](https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part1.html)
 
 * Docker
+Ref:
+- [Container Networking From Scratch](https://youtu.be/6v_BDHIgOY8)
+
 ```sh
 # remove images with tag <none>
 $ docker rmi $(docker images --filter "dangling=true")
 ```
 
+* Kubernetes
+- [Kubernetes and Networks](https://youtu.be/GgCA2USI5iQ)
+- [Communication Is Key - Understanding Kubernetes Networking](https://youtu.be/InZVNuKY5GY)
+- [Kubernetes 的 Go 微服务实践](https://www.infoq.cn/article/gXEQ7HaBkoujLF1RRj7C)
+
 * Build Angular by Bazel
 Ref:
-- https://blog.bitsrc.io/angular-8-bazel-walkthrough-f7585bcaf282
+- [Angular 8 with Bazel](https://blog.bitsrc.io/angular-8-bazel-walkthrough-f7585bcaf282)
 
 * MongoDB
 Ref:
-- https://docs.mongodb.com/v4.0/reference/
+- [User guide of Mongo 4.0](https://docs.mongodb.com/v4.0/reference/)
 
