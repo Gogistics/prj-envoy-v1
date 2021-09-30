@@ -53,13 +53,13 @@ Install Docker, Bazel, etc. on the Linux environment. I wrote this demo and buil
 2. Create Docker network and certs
 3. Write API application and gRPC server in Golang
 4. Build Docker images
-5. Bring up all the Docker containers
+5. Bring up all the Docker containers and test the API service, gRPC service, and Nignx
+6. If you are interested in CI pipeline, you can think of the CI pipeline design and the implementation, especially integrate Bazel builds into CI pipeline. [Here](https://drive.google.com/file/d/1PZAZ9NlV8nXpVqpNvGgmvvKje6SFzFQp/view?usp=sharing) is a typical pipeline flow.
+
+Now, we are going through parts of steps:
 
 - Create certs
-Idealy for production applications, don't put the certs in the course code repository. If you're using Kubernetes, suggest reading sensitive data from [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/).
-
-
-For development, it's okay to generate certs and put them in the source code repository.
+Idealy for production applications, don't put the certs in the course code repository. If you're using Kubernetes, suggest reading sensitive data from [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/). For development/demo, it's okay to generate certs and put them in the source code repository.
 
 ```sh
 $ cd utils/
@@ -154,9 +154,7 @@ $ go mod init github.com/Gogistics/prj-envoy-v1
 # add module requirements and sums by running the command below if needed
 $ go mod tidy
 
-# then start to write the app in Golang; personally I always create a Docker container for running the app written in Golang.
-
-# For example, let's write a app in Golang and connect it to Redis and Mongo.
+# then, let's write a app in Golang and connect it to Redis and Mongo. See /services/api-v1 as reference.
 
 # 1. bring up redis and mongo
 
@@ -302,7 +300,7 @@ $ curl -k -vvv https://0.0.0.0:8443/api/v1
 
 # Once the testnig has been completed, remove the container by the following command
 $ docker rm -f atai_envoy_service_api_v1
-# \3. test the API app from outside the container (optional
+# \3. test the API app from outside the container
 
 # 4. build all required Docker images
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //databases:all
@@ -612,7 +610,7 @@ $ curl -k -vvv https://atai-envoy.com
 2. Test Envoy admin by visiting http://0.0.0.0:8001
 
 
-## MIS
+## References
 * Golang
 Ref:
 - [Golang code review](https://github.com/golang/go/wiki/CodeReviewComments)
@@ -621,6 +619,7 @@ Ref:
 * Docker
 Ref:
 - [Container Networking From Scratch](https://youtu.be/6v_BDHIgOY8)
+- [CNI/CNM - Introducing Container Networking](https://youtu.be/QMNbgmxmB-M)
 
 ```sh
 # remove images with tag <none>

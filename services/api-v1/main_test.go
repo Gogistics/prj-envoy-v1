@@ -12,6 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+// TODO: fix the errors
 func TestRouter(t *testing.T) {
 	// Instantiate the router using the constructor function that
 	// we defined previously
