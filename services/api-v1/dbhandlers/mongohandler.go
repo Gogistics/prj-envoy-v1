@@ -23,14 +23,15 @@ var (
 )
 
 func getMongoClient() *mongo.Client {
-	/* Notes:
-		   - 172.10.0.71 is the IP of mongo standalone and 172.10.0.55 is the IP of envoy proxy
-	     - mongo 4.0.5-r0 was deployed for this demo because Alpine 3.9 support that version
+	/*
+			Notes:
+			- 172.10.0.71 is the IP of mongo standalone and 172.10.0.55 is the IP of envoy proxy
+		    - mongo 4.0.5-r0 was deployed for this demo because Alpine 3.9 support that version
 
-	     Ref:
-	     - https://pkgs.alpinelinux.org/packages?name=mongodb&branch=v3.9
-	     - https://www.mongodb.com/blog/post/quick-start-golang-mongodb-starting-and-setup
-		   - https://www.mongodb.com/blog/post/quick-start-golang--mongodb--modeling-documents-with-go-data-structures
+		    Ref:
+		    - https://pkgs.alpinelinux.org/packages?name=mongodb&branch=v3.9
+		    - https://www.mongodb.com/blog/post/quick-start-golang-mongodb-starting-and-setup
+			- https://www.mongodb.com/blog/post/quick-start-golang--mongodb--modeling-documents-with-go-data-structures
 	*/
 	mongoURI := "mongodb://web_test_user:web-1234567@172.10.0.55:27017/web"
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

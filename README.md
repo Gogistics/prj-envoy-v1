@@ -611,6 +611,17 @@ $ curl -k -vvv https://atai-envoy.com
 
 
 ## References
+
+* Envoy
+- [Intro: Envoy - Matt Klein & Constance Caramanolis, Lyft](https://youtu.be/P719qI2h2yY)
+- [Envoy Internals Deep Dive - Matt Klein, Lyft (Advanced Skill Level)](https://youtu.be/gQF23Vw0keg)
+- [What is Envoy — envoy 1.20.0-dev-21df5e documentation](https://www.envoyproxy.io/docs/envoy/latest/intro/what_is_envoy)
+​​- [Run Envoy — envoy 1.20.0-dev-fd6e67 documentation](https://www.envoyproxy.io/docs/envoy/latest/start/quick-start/run-envoy)
+- [Article Part 1: Getting started with Envoy Proxy for microservices resilience](https://www.getambassador.io/resources/getting-started-envoyproxy-microservices-resilience/)
+
+- [Load balancing simulation and visualization](https://github.com/envoyproxy/envoy/issues/7974)
+- [envoy-lb-simulator](https://github.com/ynqa/envoy-lb-simulator)
+
 * Golang
 Ref:
 - [Golang code review](https://github.com/golang/go/wiki/CodeReviewComments)
