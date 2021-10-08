@@ -642,8 +642,11 @@ $ docker rmi $(docker images --filter "dangling=true")
 - [Communication Is Key - Understanding Kubernetes Networking](https://youtu.be/InZVNuKY5GY)
 - [Kubernetes 的 Go 微服务实践](https://www.infoq.cn/article/gXEQ7HaBkoujLF1RRj7C)
 
-* Build Angular by Bazel
+* Bazel
 Ref:
+- [Command line reference](https://docs.bazel.build/versions/main/command-line-reference.html)
+- [Configurable attributes](https://docs.bazel.build/versions/1.2.0/configurable-attributes.html)
+- [Container stamping](https://github.com/bazelbuild/rules_docker#stamping)
 - [Angular 8 with Bazel](https://blog.bitsrc.io/angular-8-bazel-walkthrough-f7585bcaf282)
 
 * MongoDB
