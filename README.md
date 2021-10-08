@@ -1,10 +1,29 @@
 # Tutorial of Envoy, etc.
 This tutorial aims to share my experience of using Envoy. The demo is going to show you how to deploy Enovy proxies, web app in Golang, Redis, Mongo, and Nginx, and have them communicate with each other. With the basic understanding of the communicaiton between components, we will be able to debug the issues of service mesh more efficiently. Slides are [here](https://docs.google.com/presentation/d/1Pwcz2QOR7TnffP0VgZ8zxweUiakeF46V6VoPI_gt3rc/edit?usp=sharing).
 
+Before learning about Envoy, let's review what is a proxy server. In computer networking, a proxy server is a mecchanism that acts as an middleman between a client requesting a resource and the server providing that resource. From service-oriented architecture point of view, proxy plays a crucial role of handling the communication between services. Therefore, it is going to be helpful to learn proxy server during microservice development and debugging.
+
+Generally, proxy servers can be categorized by forward proxy and reverse proxy.
+
+* Forward proxy capabilities
+- Pass unmodified requests and responses between client and server; this type of forward proxy is usually known as a gateway/tunnel
+- Allow users to hide their IP while using internet services
+
+* Reverse proxy capabilities
+- Security
+- Load balancing
+- Caching
+- Compression
+- etc.
+
+Ref:
+- [Proxy server](https://en.wikipedia.org/wiki/Proxy_server)
+- [Proxy servers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Proxy_servers_and_tunneling)
+- [What is a proxy server](https://www.fortinet.com/resources/cyberglossary/proxy-server)
+
 
 ## Introduction of Envoy
-Envoy is a high-performance communication bus designed for large modern service-oriented architectures. And Envoy has been developed with the belief that: **The network should be transparent to applications. When network and application problems do occur it should be easy to determine the source of the problem.** Matt Klein and bunch of contributors already shared their knowledge and information about Envoy in many places, such as CNCF events and talks, YouTube, etc. Strongly suggest reading and watching those resources to know more about Envoy and enjoy developing new stuff with Envoy!
-
+After reviewing what a proxy server is, let's start learning Enovy. Envoy is a high-performance communication bus designed for large modern service-oriented architectures. And Envoy has been developed with the belief that: **The network should be transparent to applications. When network and application problems do occur it should be easy to determine the source of the problem.** Matt Klein and bunch of contributors already shared their knowledge and information about Envoy in many places, such as CNCF events and talks, YouTube, etc. Strongly suggest reading and watching those resources to know more about Envoy and enjoy developing new stuff with Envoy!
 
 [Overview of Envoy architecture](https://drive.google.com/file/d/12I08q2M9WeuaVqIyk8ZwDFTYxJ8K0p4x/view?usp=sharing)
 
@@ -38,7 +57,6 @@ And the folder directories are as follows:
 * ./envoys/ contains a Bazel file for building Envoy Docker images; in this demo, there are four kinds of Envoy proxies will be built.
 * ./services/ contains api-v1/, grpc-v1/, nginx-v1/, web-frontend-angular/, and web-frontend-react/. api-v1/ is for developing API application in Golang and a Bazel file for building API Docker image, grpc-v1/ is for developing gRPC server and client in Golang and Bazel files for building their Docker images. nginx-v1/ contains a Bazel file for building Nginx Docker image.
 * ./utils/ contains certs/, configs/, dockerfiles/, and scripts/
-
 
 ### Context
 Based on the topology, what we want to achieve are as follows:
