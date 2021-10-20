@@ -359,6 +359,9 @@ $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/
 $ bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:nginx-v0.0.0
 $ bazel run --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //services/nginx-v1:nginx-v0.0.0
 
+# if you need to remove images with tag <none>, run the following command
+$ docker rmi $(docker images --filter "dangling=true")
+
 # 5. login to the registry and push the docker images to the registry
 $ docker login
 
@@ -650,15 +653,11 @@ Ref:
 - [Container Networking From Scratch](https://youtu.be/6v_BDHIgOY8)
 - [CNI/CNM - Introducing Container Networking](https://youtu.be/QMNbgmxmB-M)
 
-```sh
-# remove images with tag <none>
-$ docker rmi $(docker images --filter "dangling=true")
-```
-
 * Kubernetes
 - [Kubernetes and Networks](https://youtu.be/GgCA2USI5iQ)
 - [Communication Is Key - Understanding Kubernetes Networking](https://youtu.be/InZVNuKY5GY)
 - [Kubernetes 的 Go 微服务实践](https://www.infoq.cn/article/gXEQ7HaBkoujLF1RRj7C)
+- [Hand-crafting a Sidecar Proxy and Demystifying Istio](https://venilnoronha.io/hand-crafting-a-sidecar-proxy-and-demystifying-istio)
 
 * Bazel
 Ref:

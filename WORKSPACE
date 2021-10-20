@@ -23,7 +23,7 @@ http_archive(
     ],
 )
 
-# download the docker rules
+# download docker rules
 http_archive(
     name = "io_bazel_rules_docker",
     sha256 = "59d5b42ac315e7eadffa944e86e90c2990110a1c8075f1cd145f487e999d22b3",
