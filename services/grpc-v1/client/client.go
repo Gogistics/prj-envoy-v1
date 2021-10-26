@@ -185,6 +185,15 @@ func main() {
 	creds := credentials.NewTLS(&tlsCfg)
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 	opts = append(opts, grpc.WithBlock())
+	/* Notes:
+	- add FailOnNonTempDialError(true) to facilitate issue triage while connection error
+
+	Ref: https://stackoverflow.com/questions/62663990/creating-a-grpc-client-connection-with-the-withblock-option-to-an-asynchronous
+	2021/10/29 18:38:03 Dialing RPC server...
+	2021/10/29 18:38:03 fail to dial: connection error: desc = "transport: authentication handshake failed: remote error: tls: unrecognized name"
+	exit status 1
+	*/
+	opts = append(opts, grpc.FailOnNonTempDialError(true))
 	log.Println("Dialing RPC server...")
 	conn, err := grpc.Dial(*serverAddr, opts...)
 	if err != nil {

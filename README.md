@@ -5,11 +5,11 @@ Before learning about Envoy, let's review what is a proxy server. In computer ne
 
 Generally, proxy servers can be categorized by forward proxy and reverse proxy.
 
-* Forward proxy capabilities
+* Forward proxy capabilities:
 - Pass unmodified requests and responses between client and server; this type of forward proxy is usually known as a gateway/tunnel
 - Allow users to hide their IP while using internet services
 
-* Reverse proxy capabilities
+* Reverse proxy capabilities:
 - Security
 - Load balancing
 - Caching

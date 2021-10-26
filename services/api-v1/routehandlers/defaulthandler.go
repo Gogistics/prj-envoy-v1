@@ -70,7 +70,7 @@ func (handler DefaultHandler) Hello(respWriter http.ResponseWriter, req *http.Re
 		http.Error(respWriter, err.Error(), http.StatusInternalServerError)
 		return
 	} else {
-		respWriter.Header().Set("Content-Type", "applicaiton/json; charset=utf-8")
+		respWriter.Header().Set("Content-Type", "application/json; charset=utf-8")
 		respWriter.Write(jProfile)
 	}
 }
@@ -96,7 +96,6 @@ func (handler DefaultHandler) PostVisitor(respWriter http.ResponseWriter, req *h
 		dbhandlers.MongoWrapper.FindOneAndUpdate("userName", userName, &newData)
 	}
 
-	// get values through r.Form
 	respWriter.WriteHeader(http.StatusCreated)
 	respWriter.Write([]byte("Request has been handled successfully"))
 }
