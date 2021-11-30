@@ -44,7 +44,7 @@ After reviewing what a proxy server is, let's start learning Enovy. Envoy is a h
 ## Demo
 In this demo, we are going to spin up a full container topology illustrated in [demo diagram](https://drive.google.com/file/d/1vxLz5n-xSXl-OgHwXULtl5MUyzSk7Sdg/view?usp=sharing). All Docker images are stored at [DockerHub](https://hub.docker.com/repository/docker/alantai/prj-envoy-v1).
 
-Basically, the container topology comprises the components as follows:
+Basically, the network/container topology comprises the components as follows:
 * Envoy proxies
 * API applications written in Golang
 * Nginx CDNs
@@ -168,6 +168,9 @@ $ openssl x509 -req \
 ```sh
 # create a git repo. in cloud and come back to the project root to init a Golang mod
 $ go mod init github.com/Gogistics/prj-envoy-v1
+
+# if need to update the module name, run the following command
+$ go mod edit -module <NEW-MODULE-NAME>
 
 # add module requirements and sums by running the command below if needed
 $ go mod tidy
@@ -642,6 +645,7 @@ $ curl -k -vvv https://atai-envoy.com
 
 - [Load balancing simulation and visualization](https://github.com/envoyproxy/envoy/issues/7974)
 - [envoy-lb-simulator](https://github.com/ynqa/envoy-lb-simulator)
+- [Read-Update-Copy](https://lwn.net/Articles/262464/)
 
 * Golang
 Ref:

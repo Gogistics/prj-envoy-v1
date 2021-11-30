@@ -1,1 +1,5 @@
 4.2.1
+
+versions.check(
+    minimum_bazel_version="4.2.0"
+)
